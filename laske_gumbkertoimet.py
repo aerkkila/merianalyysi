@@ -9,13 +9,12 @@
 import numpy as np
 import scipy.stats as st
 
-sk = '/home/aerkkila/a/pintaalat_15_1/';
-uk = '/home/aerkkila/a/kuvat1/';
-
+jaaraja = "15_1" #peittävyys_paksuus
 v0 = 2006; #ensimmäinen vuosi datassa
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ["A_RCP4.5", "A_RCP8.5", "B_RCP4.5", "B_RCP8.5", "D_RCP4.5", "D_RCP8.5"];
 n = 30; #aikaikkunan pituus; jos negatiivinen, otetaan kaikki vuodet
+
+sk = '/home/aerkkila/a/pintaalat_'+jaaraja+'/';
 
 for aind in range(len(ajot)):
     data = np.genfromtxt(sk + 'pa_' + ajot[aind] + '_maks.txt', usecols=[0]);
@@ -27,7 +26,7 @@ for aind in range(len(ajot)):
     #kun n on parillinen, takaa jää yksi vuosi vähemmän pois kuin edestä
     ind = 0;
 
-    f = open("gumbkertoimet_" + ajot[aind] + ".txt", "w");
+    f = open("gumbkertoimet_" + jaaraja + "_" + ajot[aind] + ".txt", "w");
     while 1:
         pa = data[ind : ind+n]; #valitaan aikaikkuna
         pa = np.sort(pa);
