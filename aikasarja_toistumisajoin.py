@@ -1,13 +1,17 @@
 #!/usr/bin/python3
 
+#tekee värikuvan, jonka akselit x, y, c ovat:
+#vuosiluku, toistumisaika, pinta-ala
+#käytetään liukuvaa aikasarjaa
+#gumbelsuoran termit luetaan tiedostoista,
+#jotka tehdään ohjelmalla laske_gumbkertoimet.py
+
 import numpy as n
 from matplotlib.pyplot import *
 from matplotlib.colors import ListedColormap
 
 jaaraja = "15_1";
 uk = '/home/aerkkila/a/kuvat1/';
-
-#varit = ('r', 'g', 'b', 'm', 'c', 'k');
 
 nimet = ["A: 4.5", "A: 8.5", "B: 4.5", "B: 8.5", "D: 4.5", "D: 8.5"];
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
@@ -18,8 +22,7 @@ T1 = 100;
 
 #kaavat värien laskemiselle värikartassa
 #vihr1 = lambda c: n.tanh(n.abs((0 if(c < 1/2) else 1) - c) * 5);
-vihr = lambda c: n.abs(n.sin(c*n.pi*20)**0.6)
-
+vihr = lambda c: n.abs(n.sin(c**0.2*n.pi*20)**0.6)
 pun = lambda c: c**0.5;
 sin = lambda c: 1 - pun(c);
 
@@ -62,9 +65,30 @@ for aind in range(len(ajot)):
     xlabel("vuosiluku");
     ylabel("toistumisaika (vuotta)");
     title('%s' %(nimet[aind]));
-    colorbar(label="pinta-ala ($km^2$)");
+    
 tight_layout(h_pad=1);
-if 1:
+tallenna = 0;
+if not tallenna:
     show();
 else:
-    savefig(uk + "pa_x_"+jaaraja+".png");
+    savefig(uk + "pa_värit"+jaaraja+".png");
+
+close();
+
+#Tehdään varipalkki erilliseksi kuvaksi, koska muuten on vaikeaa
+figure(figsize=(3,10));
+palkki = [[]]*256;
+for tmp in range(256):
+    palkki[tmp] = [tmp]*10
+imshow(palkki, cmap=vkartta);
+ax = gca();
+ax.set_xticks([]);
+ax.set_yticks(n.linspace(0,255,5));
+ax.set_yticklabels(n.linspace(A0,A1,5));
+ylabel("pinta-ala ($km^2$)");
+tight_layout();
+
+if not tallenna:
+    show();
+else:
+    savefig(uk + "pa_värit_väripalkki.png");
