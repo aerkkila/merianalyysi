@@ -18,13 +18,23 @@ ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
 
 #pienin ja suurin mukaanotettava toistumisaika
 T0 = 2;
-T1 = 100;
+T1 = 80;
+
+#Pinta-alaväli, jolle värit skaalautuvat
+A0 = 5000; A1 = 80000;
 
 #kaavat värien laskemiselle värikartassa
 #vihr1 = lambda c: n.tanh(n.abs((0 if(c < 1/2) else 1) - c) * 5);
 vihr = lambda c: n.abs(n.sin(c**0.2*n.pi*20)**0.6)
 pun = lambda c: c**0.5;
 sin = lambda c: 1 - pun(c);
+
+#tehdään rgba-värikartta halutusta pinta-alavälistä
+varit = [[]]*256
+c = n.linspace(0,1,256);
+for tmp in range(256):
+    varit[tmp] = [pun(c[tmp]), vihr(c[tmp]), sin(c[tmp]), 1];
+    vkartta = ListedColormap(varit);
 
 Tarr = n.array(range(T0, T1+1));
 Tarr = Tarr[::-1]; #suunnanvaihdos koska kuva toimii näin päin
@@ -53,16 +63,8 @@ for aind in range(len(ajot)):
         tmp+=1;
     A = n.array(A);
 
-    #tehdään rgb-värikartta halutusta pinta-alavälistä
-    A0 = 0; A1 = 100000;
-    varit = [[]]*256
-    c = n.linspace(0,1,256);
-    for tmp in range(256):
-        varit[tmp] = [pun(c[tmp]), vihr(c[tmp]), sin(c[tmp]), 1];
-    vkartta = ListedColormap(varit);
-
     subplot(3,2,aind+1);
-    kuva = imshow(A, cmap=vkartta, extent=rajat, aspect='auto');
+    kuva = imshow(A, cmap=vkartta, aspect='auto', extent=rajat, vmin=A0, vmax=A1);
     xlabel("vuosiluku");
     ylabel("toistumisaika (vuotta)");
     title('%s' %(nimet[aind]));
@@ -84,12 +86,10 @@ close();
 figure(figsize=(3,10));
 palkki = [[]]*256;
 for tmp in range(256):
-    palkki[tmp] = [tmp]*10
-imshow(palkki, cmap=vkartta);
+    palkki[tmp] = [tmp*(A1-A0)/256+A0]*10
+imshow(palkki, cmap=vkartta, vmin=A0, vmax=A1);
 ax = gca();
 ax.set_xticks([]);
-ax.set_yticks(n.linspace(0,255,5));
-ax.set_yticklabels(n.linspace(A0,A1,5));
 ylabel("pinta-ala ($km^2$)");
 tight_layout();
 
