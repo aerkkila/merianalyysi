@@ -37,10 +37,11 @@ for aind in range(len(ajot)):
     
     #luetaan suoran parametrit
     tied = "gumbkertoimet_%s_%s.txt" %(jaaraja,ajot[aind]);
-    data = n.genfromtxt(tied, usecols=[0,1,3]); #a, b, vuosi
+    data = n.genfromtxt(tied); #a, b, r^2, vuosi
     a = data[:,0];
     b = data[:,1];
-    v = data[:,2];
+    r2 = data[:,2];
+    v = data[:,3];
     rajat = [min(v), max(v), T0, T1];
 
     #pinta-alat kaikista toistumisajoista
@@ -65,6 +66,10 @@ for aind in range(len(ajot)):
     xlabel("vuosiluku");
     ylabel("toistumisaika (vuotta)");
     title('%s' %(nimet[aind]));
+    ax2 = gca().twinx();
+    ax2.plot(v,r2, color='w');
+    ylabel("$R^2$", rotation=0);
+    ylim([0.92, 1])
     
 tight_layout(h_pad=1);
 tallenna = 0;
