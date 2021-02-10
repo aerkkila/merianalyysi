@@ -15,7 +15,7 @@ nimet = ["A: 4.5", "A: 8.5", "B: 4.5", "B: 8.5", "D: 4.5", "D: 8.5"];
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
 
 #halutut toistumisajat
-Tn = [4, 20, 50, 100];
+Tn = [2, 5, 10, 30, 50];
 
 #pinta-alan yhtälö toistumisajan funktiona sovitussuoran parametreista
 pa_l = lambda T,a,b: (-n.log(-n.log(1/T))-b) / a;
@@ -42,6 +42,7 @@ for aind in range(len(ajot)):
 
     subplot(3,2,aind+1);
     plot(v, A, color='k');
+    grid('on')
     xlabel("vuosiluku");
     ylabel("pinta-ala ($km^2$)");
     #ylim([5000, 75000])

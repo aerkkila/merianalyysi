@@ -25,9 +25,9 @@ A0 = 5000; A1 = 80000;
 
 #kaavat värien laskemiselle värikartassa
 #vihr1 = lambda c: n.tanh(n.abs((0 if(c < 1/2) else 1) - c) * 5);
-vihr = lambda c: n.abs(n.sin(c**0.2*n.pi*20)**0.6)
+vihr = lambda c: n.abs(n.sin(c**0.4*n.pi*20)**0.4)
 pun = lambda c: c**0.5;
-sin = lambda c: 1 - pun(c);
+sin = lambda c: 1-pun(n.abs(c-0.33))
 
 #tehdään rgba-värikartta halutusta pinta-alavälistä
 varit = [[]]*256
@@ -88,8 +88,14 @@ palkki = [[]]*256;
 for tmp in range(256):
     palkki[tmp] = [tmp*(A1-A0)/256+A0]*10
 imshow(palkki, cmap=vkartta, vmin=A0, vmax=A1);
+
+#halutut pinta-alat (yticks) väripalkille
 ax = gca();
 ax.set_xticks([]);
+ytikit = n.array([A0, 15000, 20000, 25000, 35000, 50000, 60000, A1]);
+ytiknorm = (ytikit - A0) / (A1 - A0) * 255;
+ax.set_yticks(ytiknorm);
+ax.set_yticklabels(ytikit);
 ylabel("pinta-ala ($km^2$)");
 tight_layout();
 
