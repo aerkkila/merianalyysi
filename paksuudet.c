@@ -3,8 +3,8 @@
 #include <string.h>
 #include <math.h>
 
-/*Tämä hakee tekstiksi käännetyistä nc-tiedostoista halutuista koordinaateista paksuudet ja tulostaa kahdeksi eri tiedostoksi koko aikasarjan sekä vuosittaiset maksimit. Maksimeiksi hyväksytään vain kiintojää.
-  Jää oletetaan ajojääksi, jos kasvunopeus ylittää valitun raja-arvon.
+/*Tämä hakee tekstiksi käännetyistä nc-tiedostoista halutuista koordinaateista paksuudet
+  ja tulostaa aikasarjan tekstitiedostoksi kultakin ajolta
 
   Komentorivillä annetaan ajojen nimet ja lopussa ensimmäinen ja viimeinen vuosi, esimerkiksi ./paksuudet A001 B001 D001 1975 2005. Tiedostoista icevolume*.nc on oltava jään paksuudet tekstiksi käännettyinä ja tarvitaan myös tiedosto latlon.txt, jossa on ensin jokaisen koordinaattiruudun leveys- ja sitten pituuspiirit joitten viimeistenkin arvojen jälkeen on oltava pilkku ja sitten puolipiste. Muuta ei saa olla.*/
 
@@ -118,9 +118,9 @@ int main(int argc, char** argv) {
   char uloskansio[] = "pakspaikat/";
   char siskansio[] = "ncteksti/";
   char latlontied[] = "latlon.txt";
-  char* paikat[] = {"Kemi_", "Hailuoto_", "Raahe_", "Kalajoki_", "Pietarsaari_", "Mustasaari_"};
-  float paikatlat[] = {65.6322, 64.9307, 64.6508, 64.2245, 63.7466, 63.1579};
-  float paikatlon[] = {24.4908, 24.6760, 24.3768, 23.6939, 22.5434, 21.2553};
+  char* paikat[] = {"Kemi_", "Kalajoki_", "Mustasaari_", "Nordmaling_", "Rauma_", "Söderhamn_"};
+  float paikatlat[] = {65.6322, 64.2250, 63.1579, 63.4228, 61.1050, 61.3897};
+  float paikatlon[] = {24.4908, 23.6921, 21.2553, 19.6408, 21.4220, 17.1539};
   char muuttuja[] = "icevolume_";
   char ajo[5];
   char tmpnimi[200];
@@ -163,9 +163,6 @@ int main(int argc, char** argv) {
   }
   fclose(f);
 
-  sprintf(tmpnimi, "%s%sajojäät.txt", ulakansio, uloskansio);
-  FILE *fajojaa = fopen(tmpnimi, "w");
-
   for (int ajoind=1; ajoind<argc-2; ajoind++) {
     char *apu = argv[ajoind]+strlen(argv[ajoind])-4; //viimeiset neljä ovat esim A001
     strcpy(ajo, apu);
@@ -174,14 +171,10 @@ int main(int argc, char** argv) {
     int paikkoja = arrpit(paikatlat);
     for(int paikka=0; paikka<paikkoja; paikka++) {
       /*avataan ulostulot
-       esim /kansio/pakspaikat/Kemi_icevolume_A001_max.txt*/
+       esim /kansio/pakspaikat/Kemi_icevolume_A001_kaikki.txt*/
       sprintf(tmpnimi, "%s%s%s%s%s_kaikki.txt",
 	      ulakansio, uloskansio, paikat[paikka], muuttuja, ajo);
       FILE* fkaikki = fopen(tmpnimi, "w");
-    
-      sprintf(tmpnimi, "%s%s%s%s%s_maks.txt",
-	      ulakansio, uloskansio, paikat[paikka], muuttuja, ajo);
-      FILE* fmaks = fopen(tmpnimi, "w");
   
       for(int i=0; i<vuosia; i++) {
 	/* avataan luettava tiedosto,
@@ -199,34 +192,13 @@ int main(int argc, char** argv) {
 	for(int j=1; j<=366; j++)
 	  fprintf(fkaikki, "%.3f\t%i\t%i\n", paks[j], j, i+alkuvuosi);
 	fclose(sis);
-    
-	/*haetaan ja tulostetaan maksimi ajankohtineen
-	  loppukeväällä voi ajautua paksua ajojäätä,
-	  asetetaan siksi raja-arvo päivittäiselle kasvulle,
-	  jonka ylityttyä oletetaan jään olevan ajojäätä ja hylätään*/
-	float kasvuraja = 0.25; //metriä päivässä
-	float maks = 0;
-	int maksind = 0;
-	for(int j=1; j<366; j++) {
-	  if(paks[j]-paks[j-1] > kasvuraja) {
-	    fprintf(fajojaa, "\n%s, %s, vuosi %i, päivä %i, Δh = %.1f cm / d\n",
-		   paikat[paikka], argv[ajoind], i+alkuvuosi, j+1, (paks[j]-paks[j-1])*100);
-	    break;
-	  }
-	  if(paks[j] > maks) {
-	    maks = paks[j];
-	    maksind = j;
-	  }
-	}
-	fprintf(fmaks, "%.3f\t%i\t%i\n", maks, maksind+1, i+alkuvuosi);
+
 	free(paks);
       }
       
       fclose(fkaikki);
-      fclose(fmaks);
     }
   }
-  fclose(fajojaa);
   free(ktit.lat);
   free(ktit.lon);
   free(pind);
