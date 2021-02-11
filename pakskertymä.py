@@ -1,65 +1,70 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 
 from __future__ import division
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
-import tarpeelliset_asiat as t
 
-### Kuvaajan plottaus mallien ja havaintojen kertymätodennäköisyyksistä ###
-
-#kertymätodennäköisyys kysytylle paksuudelle
-def p_haku(H, haku):
-    i = 0; #haetaan ensin lähimmäs hakua tulevat indeksit
-    while H[i] < haku:
-        i+=1;
-    i-=1;
-    #tarkennetaan interpoloimalla kahden pisteen välillä
-    P = np.linspace(0,1,len(H));
-    a = (P[i+1]-P[i]) / (H[i+1]-H[i]);
-    b = P[i] - a*H[i];
-    p = (lambda x: a*x + b)(haku)
-    return p;
-
-def plottaa(H, vari, paksuus=0, tunniste=""):
-    if paksuus == 0:
-        paksuus = 1.5;
-    avg = np.mean(H);
-    P = np.linspace(0,1,len(H))
-    plt.plot(H, P, linewidth=paksuus, color=vari, label=tunniste)
-    plt.scatter(avg, p_haku(H, avg), marker='o', s=50, color=vari); #keskiarvopiste
-
-def kuvan_asetukset(otsikko):
-    plt.grid('on')
-    plt.title(otsikko, fontsize=15);
-    plt.ylim(0,1)
-    plt.ylabel('Cumulative propability',fontsize=15)
-    plt.xlabel('Annual maximum ice thickness (m)',fontsize=15)
-    plt.legend(ncol=1, fontsize=11, loc='lower right');
-    
-
+### Kuvaajan piitäminen paksuuden kertymätodennäköisyyksistä ###
+hnnotTied = '/home/aerkkila/a/Perämeren_jäänpaksuus_1912_2019.csv'
 alkuvuosi = 1975;
 loppuvuosi = 2006; #ensimmäinen, jota ei ole
 ajot = ("A001", "B001", "D001");
-mallikansio = "/home/aerkkila/a/pakspaikat/";
+ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+sk = "/home/aerkkila/a/pakspaikat/";
 varit = ("r", "m", "c");
+paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
+paikkaind = (2, 8, 6, 11);
+muuttuja = "icevolume"
 
-hnnot = t.lue_havainnot(alku=alkuvuosi, loppu=loppuvuosi);
-ajotulos = [[]]*len(ajot);
-for i in range(len(ajot)):
-   ajotulos[i] = t.lue_malli(kansio=mallikansio, nimiloppu="_icevolume_"+ajot[i]+"_maks.txt");
+#luetaan havainnot
+hnnot = [[]]*(loppuvuosi-alkuvuosi);
+data=np.genfromtxt(hnnotTied, delimiter=",", comments="#", usecols=paikkaind);
+for i in range(len(paikkaind)):
+    v0 = alkuvuosi;
+    v1 = loppuvuosi;
+    if(paikat[i] == "Nordmaling"): #täältä on eri aikasarja
+        v0 += 1;
+        v1 += 1;
+    H = data[v0-1912 : v1-1912, i] #valitaan aika ja paikka
+    H = H[~np.isnan(H)];
+    hnnot[i] = H;
 
-plt.figure(figsize=(18,15));
+#luetaan malli
+paikka_ajo = [[]]*len(paikat);
+for j in range(len(paikat)):
+    paikkatulos = [[]]*len(ajot);
+    for i in range(len(ajot)):
+        tied = "%s%s_%s_%s_maks.txt" %(sk, paikat[j], muuttuja, ajot[i]);
+        paikkatulos[i] = np.genfromtxt(tied, usecols=(0));
 
-for i in range(len(hnnot)):
-    ax = plt.subplot(2,3,i+1);
-    plottaa(hnnot[i], 'b', tunniste="observations");
-    for tmp in range(len(ajot)):
-        plottaa(ajotulos[tmp][i], varit[tmp], tunniste=ajot[tmp][0]+"_history");
-    kuvan_asetukset(t.paikat[i]);
+    paikka_ajo[j] = np.vstack(paikkatulos);
+    
+plt.figure(figsize=(12,10));
+
+for p in range(len(paikat)):
+    ax = plt.subplot(3,2,p+1);
+    
+    if(p < len(paikkaind)): #havainnot
+        htmp = np.sort(hnnot[p]);
+        F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #kokeellinen kertymäfunktio
+        plt.plot(htmp, F, color='b', label="havainnot");
+        
+    for a in range(len(ajot)): #malli
+        htmp = np.sort(paikka_ajo[p][a])
+        F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #kokeellinen kertymäfunktio
+        plt.plot(htmp, F, color=varit[a], label=ajonimet[a]);
+    
+    plt.grid('on')
+    plt.title(paikat[p], fontsize=15);
+    plt.ylim(0,1)
+    plt.xlim(0,120)
+    plt.ylabel('Kertymätodennäköisyys',fontsize=15)
+    plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15)
+    plt.legend(ncol=1, fontsize=11, loc='upper left', frameon=0);
+    plt.tight_layout();
 
 if 1:
     plt.show();
 else:
-    plt.savefig('/home/aerkkila/a/kuvat/pakskuvat_001.png');
+    plt.savefig('/home/aerkkila/a/kuvat1/pakskert_hist.png');
