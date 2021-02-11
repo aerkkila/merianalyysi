@@ -127,8 +127,7 @@ int main(int argc, char** argv) {
 
   /*komentorivillä olkoot ensin halutut ajonimet sanojen lopussa ja lopussa alku- ja loppuvuosi*/
   if(argc < 4) {
-    fprintf(stderr, "Liian vähän argumentteja\n");
-    return 1;
+    printf("Varoitus: yhtään ajoa ei annettu\n");
   }
   if(!sscanf(argv[argc-1], "%i", &loppuvuosi)) {
     fprintf(stderr, "Ei annettu loppuvuotta\n");
@@ -198,8 +197,9 @@ int main(int argc, char** argv) {
     }
   }
   /*tulostetaan latex-talukko koordinaateista*/
+  setlocale(LC_ALL, "fi_FI.utf8");
   f = fopen("../taul_pakspaikat.txt", "w");
-  fprintf(f, "paikka & koordinaatit\\\\\n");
+  fprintf(f, "paikka & koordinaatit\\\\\n\\hline\n");
   for(int i=0; i<arrpit(paikatlat); i++)
     fprintf(f, "%s & %.4f %.4f \\\\\n", paikat[i], ktit.lat[pind[i]], ktit.lon[pind[i]]);
   fclose(f);
