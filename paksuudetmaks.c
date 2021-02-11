@@ -30,7 +30,7 @@ int main() {
   char muuttuja[] = "icevolume";
   char tunniste[] = "kaikki.txt";
   char uusi_tunniste[] = "maks.txt";
-  int kasvuraja = 17;
+  int kasvuraja = 10;
   DIR *d = opendir(siskansio);
   if(!d) {
     fprintf(stderr, "Kansiota \"%s\" ei voitu avata\n", siskansio);

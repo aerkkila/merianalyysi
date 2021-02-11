@@ -58,7 +58,7 @@ for p in range(len(paikat)):
     plt.grid('on')
     plt.title(paikat[p], fontsize=15);
     plt.ylim(0,1)
-    plt.xlim(0,120)
+    plt.xlim(0,110)
     plt.ylabel('Kertymätodennäköisyys',fontsize=15)
     plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15)
     plt.legend(ncol=1, fontsize=11, loc='upper left', frameon=0);

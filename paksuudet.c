@@ -116,8 +116,9 @@ int main(int argc, char** argv) {
   char siskansio[] = "ncteksti/";
   char latlontied[] = "latlon.txt";
   char* paikat[] = {"Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn"};
-  float paikatlat[] = {65.6322, 64.2250, 63.1579, 63.4228, 61.1050, 61.3897};
-  float paikatlon[] = {24.4908, 23.6921, 21.2553, 19.6408, 21.4220, 17.1539};
+  float paikatlat[] = {65.6322, 64.2250, 63.1579, 63.4498, 61.1050, 61.3897};
+  float paikatlon[] = {24.4908, 23.6921, 21.2553, 19.6341, 21.4220, 17.1539};
+  
   char muuttuja[] = "icevolume_";
   char ajo[5];
   char tmpnimi[200];
