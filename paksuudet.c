@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <locale.h>
 
 /*Tämä hakee tekstiksi käännetyistä nc-tiedostoista halutuista koordinaateista paksuudet
   ja tulostaa aikasarjan tekstitiedostoksi kultakin ajolta
@@ -81,34 +82,30 @@ float* lue_vuoden_paks(FILE* f, int indeksi, int gridpit) {
   int j=0;
   while(j<indeksi) {
     if( (( c = fgetc(f) )) == ';')
-      goto MURRA;
+      return vuoden_paks;
     if(c == ',')
       j++;
   }
 
   int kerta = 0;
   while(1) {
+    kerta++;
     /*luetaan arvo*/
     if(!fscanf(f, "%f", apu++)) {
       fprintf(stderr, "Virhe: Ei luettu arvoa %i. kerralla\n", kerta);
-      goto MURRA;
+      return vuoden_paks;
     }
-    kerta++;
     /*luetaan seuraavaan samaan indeksiin asti
       tässä mennään koko kierros, koska äskeinen arvo lasketaan mukaan,
       koska pilkkua ei luettu sen jälkeen, ei siis lopeteta gridpit-1:en*/
     j=0;
     while(j<gridpit) {
       if( (( c=fgetc(f) )) == ';')
-	goto MURRA;
+        return vuoden_paks;
       if( c == ',')
 	j++;
     }
   }
-  
- MURRA:
-  *apu = -1.0;
-  return vuoden_paks;
 }
 
 #define arrpit(x) (int)(sizeof(x)/sizeof(x[0]))
@@ -118,7 +115,7 @@ int main(int argc, char** argv) {
   char uloskansio[] = "pakspaikat/";
   char siskansio[] = "ncteksti/";
   char latlontied[] = "latlon.txt";
-  char* paikat[] = {"Kemi_", "Kalajoki_", "Mustasaari_", "Nordmaling_", "Rauma_", "Söderhamn_"};
+  char* paikat[] = {"Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn"};
   float paikatlat[] = {65.6322, 64.2250, 63.1579, 63.4228, 61.1050, 61.3897};
   float paikatlon[] = {24.4908, 23.6921, 21.2553, 19.6408, 21.4220, 17.1539};
   char muuttuja[] = "icevolume_";
@@ -172,7 +169,7 @@ int main(int argc, char** argv) {
     for(int paikka=0; paikka<paikkoja; paikka++) {
       /*avataan ulostulot
        esim /kansio/pakspaikat/Kemi_icevolume_A001_kaikki.txt*/
-      sprintf(tmpnimi, "%s%s%s%s%s_kaikki.txt",
+      sprintf(tmpnimi, "%s%s%s_%s%s_kaikki.txt",
 	      ulakansio, uloskansio, paikat[paikka], muuttuja, ajo);
       FILE* fkaikki = fopen(tmpnimi, "w");
   
@@ -187,6 +184,7 @@ int main(int argc, char** argv) {
 	  return 1;
 	}
 	float* paks = lue_vuoden_paks(sis, pind[paikka], ktit.gridpit);
+	printf("\r                               ");
 	printf("\r%i / %i\t (paikka %i / %i)", i+1, vuosia, paikka+1, paikkoja);
 	fflush(stdout);
 	for(int j=1; j<=366; j++)
@@ -199,6 +197,12 @@ int main(int argc, char** argv) {
       fclose(fkaikki);
     }
   }
+  /*tulostetaan latex-talukko koordinaateista*/
+  f = fopen("../taul_pakspaikat.txt", "w");
+  fprintf(f, "paikka & koordinaatit\\\\\n");
+  for(int i=0; i<arrpit(paikatlat); i++)
+    fprintf(f, "%s & %.4f %.4f \\\\\n", paikat[i], ktit.lat[pind[i]], ktit.lon[pind[i]]);
+  fclose(f);
   free(ktit.lat);
   free(ktit.lon);
   free(pind);
