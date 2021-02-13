@@ -8,100 +8,128 @@ typedef struct {
   short paikka;
 } maks_t;
 
-maks_t hae_maksimi(short* p, int pit, int kasvuraja) {
-  maks_t r = (maks_t){p[0], 0};
-  for(int i=1; i<pit; i++) {
-    if(p[i-1] == 0)
-      continue;
-    /*paksu ajojää pois*/
-    if(p[i]-p[i-1] > kasvuraja)
-      break;
-    if (p[i] > r.arvo) {
-      r.arvo = p[i];
-      r.paikka = i;
-    }
+maks_t hae_maksimi(short* h, float* c, int pit, float konsraja) {
+  maks_t r = (maks_t){h[0], 0};
+  
+  for(int i=1; i<pit; i++) {      
+    if (h[i] > r.arvo && c[i] > konsraja)
+      r = (maks_t){h[i], i};
   }
   return r;
+}
+
+/*vaihtaa a:ssa b:n tilalle c:n*/
+char* korvaa_strstr(char* a, char* b, char* c) {
+  char* kohta0 = strstr(a, b);
+  if(!kohta0)
+    return NULL;
+  char* kohta1 = kohta0 + strlen(b);
+  char loppu[strlen(kohta1)+1];
+  strcpy(loppu, kohta1);
+  strcpy(kohta0, c);
+  strcat(a, loppu);
+  return a;
 }
 
 int main() {
   char siskansio[] = "/home/aerkkila/a/pakspaikat/";
   char uloskansio[] = "/home/aerkkila/a/pakspaikat/";
-  char muuttuja[] = "icevolume";
+  char hmuuttuja[] = "icevolume";
+  char cmuuttuja[] = "soicecov";
   char tunniste[] = "kaikki.txt";
   char uusi_tunniste[] = "maks.txt";
-  int kasvuraja = 10;
+  float konsraja = 0.9;
   DIR *d = opendir(siskansio);
   if(!d) {
     fprintf(stderr, "Kansiota \"%s\" ei voitu avata\n", siskansio);
     return 1;
   }
   struct dirent *e;
-  char *nimi = malloc(500);
+  char *hnimi = malloc(500);
+  char *cnimi = malloc(500);
   /*tämä on vain nopeasti koodattu, joten ohjelma ei määritä pituutta itse*/
   int pit = 20000;
   short* vuosi = malloc(pit*sizeof(short));
   short* paiva = malloc(pit*sizeof(short));
   short* paks = malloc(pit*sizeof(short));
+  float* kons = malloc(pit*sizeof(float));
   float apu; //paksuus on tallennettu metreinä, mutta otetaan sentteinä
   int ind;
   while((e = readdir(d))) {
-    if(strstr(e->d_name, muuttuja) && strstr(e->d_name, tunniste)) {
-      
-      sprintf(nimi, "%s%s", siskansio, e->d_name);
-      FILE* f = fopen(nimi, "r");
-      if(!f) {
-	fprintf(stderr, "Ei avattu tiedostoa \"%s\"\n", e->d_name);
+    /*haetaan yksi kerrallaan oikeat paksuustiedostot*/
+    if(strstr(e->d_name, hmuuttuja) && strstr(e->d_name, tunniste)) {
+
+      sprintf(hnimi, "%s%s", siskansio, e->d_name);
+
+      /*haetaan vastaava konsentraatiotiedosto*/
+      strcpy(cnimi, hnimi);
+      cnimi = korvaa_strstr(cnimi, hmuuttuja, cmuuttuja);
+
+      FILE* fh = fopen(hnimi, "r");
+      FILE* fc = fopen(cnimi, "r");
+      if(!fc || !fh) {
+	fprintf(stderr, "Ei avattu tiedostoa \"%s\"\n", (!fc)? cnimi : hnimi);
 	return 1;
       }
-
       
       short* paks1 = paks;
       short* paiva1 = paiva;
       short* vuosi1 = vuosi;
+      float* kons1 = kons;
 
-      /*luetaan tiedosto*/
+      /*luetaan tiedostot*/
       ind = 0;
-      while(!feof(f)) {
-	if(!(fscanf(f, "%f%hi%hi", &apu, paiva1+ind, vuosi1+ind)))
+      while(!feof(fh)) {
+	if(!(fscanf(fh, "%f%hi%hi", &apu, paiva1+ind, vuosi1+ind)))
 	  break;
 	paks1[ind] = (int)(apu*100+0.000001);
+	
+	if(!(fscanf(fc, "%f%*i%*i", kons1+ind)))
+	  fprintf(stderr, "Virhe, konsentraatiot loppuivat ennen paksuuksia\n");
 	ind++;
       }
 
-      strcpy(strstr(nimi, tunniste), uusi_tunniste);
-      f = freopen(nimi, "w", f);
+      if(!(korvaa_strstr(hnimi, tunniste, uusi_tunniste))) {
+	fprintf(stderr, "Virhe, tunnistetta ei löytynyt nimestä\n");
+	return 1;
+      }
+      fh = freopen(hnimi, "w", fh);
       /*haetaan maksimit talvittain eikä vuosittain
 	esim 30.12.2020 olisi tällöin päivä -2 vuonna 2021
 	talvi vaihtukoon elokuun loputtua päivänä 244,
-	kun vuotta jäljellä 121 päivää*/
-      maks_t m = hae_maksimi(paks, 244, kasvuraja);
-      fprintf(f, "%hi\t%hi\t%hi\n", m.arvo, paiva1[m.paikka], vuosi1[m.paikka]);
+	kun vuotta on jäljellä 122 päivää (joka vuodelle on varattu 366 päivää)*/
+      maks_t m = hae_maksimi(paks, kons, 244, konsraja);
+      fprintf(fh, "%hi\t%hi\t%hi\n", m.arvo, paiva1[m.paikka], vuosi1[m.paikka]);
 
       paks1 += 244;
+      kons1 += 244;
       paiva1 += 244;
       vuosi1 += 244;
       ind -= 244;
 
-      while(ind>300) {
-	m = hae_maksimi(paks1, 366, kasvuraja);
-	short d = ((paiva1[m.paikka]+121) % 365) - 121;
+      while(ind>300) { //tässä voisi olla 365 tai 366, mutta näin on varmempaa
+	m = hae_maksimi(paks1, kons1, 366, konsraja);
+	short d = ((paiva1[m.paikka]+122) % 366) - 122;
 	short a = vuosi1[m.paikka];
 	if(d < 0) a++;
-	fprintf(f, "%hi\t%hi\t%hi\n", m.arvo, d, a);
+	fprintf(fh, "%hi\t%hi\t%hi\n", m.arvo, d, a);
 
 	paks1 += 366;
+	kons1 += 366;
 	paiva1 += 366;
 	vuosi1 += 366;
 	ind -= 366;
       }
-      fclose(f);
+      fclose(fh);
+      fclose(fc);
     }
   }
-  free(nimi);
+  free(hnimi);
+  free(cnimi);
   free(vuosi);
   free(paiva);
   free(paks);
+  free(kons);
   closedir(d);
   return 0;
 }
