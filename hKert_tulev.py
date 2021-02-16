@@ -35,7 +35,7 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
             legsij = 'lower right';
         plt.legend(ncol=1, fontsize=11, loc=legsij, frameon=0);
         plt.tight_layout();
-    fig.suptitle("%i – %i" %(vuodet[alku], vuodet[loppu-1]));
+    fig.suptitle("%i – %i" %(vuodet[alku], vuodet[loppu-1]), fontsize=18);
 
     if 1:
         plt.show();
