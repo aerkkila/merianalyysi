@@ -13,7 +13,7 @@ from matplotlib.colors import ListedColormap
 jaaraja = "15_1";
 uk = '/home/aerkkila/a/kuvat1/';
 
-nimet = ["A: 4.5", "A: 8.5", "B: 4.5", "B: 8.5", "D: 4.5", "D: 8.5"];
+nimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
 
 #pienin ja suurin mukaanotettava toistumisaika
