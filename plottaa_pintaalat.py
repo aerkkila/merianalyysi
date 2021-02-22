@@ -7,12 +7,11 @@ from matplotlib.pyplot import *
 jaaraja = "15_1";
 sk = '/home/aerkkila/a/pakoodi/';
 tied = "gumbelkertoimet_kokoaika_"+jaaraja+".txt";
-uk = '/home/aerkkila/a/kuvat/';
+uk = '/home/aerkkila/a/kuvat1/';
 
 skdat = '/home/aerkkila/a/pintaalat_15_1/';
 
 vuosi0 = 2006; #käytetään vain nimeämiseen
-varit = ('r', 'g', 'b', 'm', 'c', 'k');
 
 data = np.genfromtxt(sk + tied, usecols=[1,2], comments = '#');
 a = data[:,0];
@@ -20,7 +19,7 @@ b = data[:,1];
 pa_l = lambda T: (-log(-log(1/T))-b) / a;
 
 #Tässä oletetaan ajojärjestys tiedostossa
-ajot = ["A_RCP4.5", "A_RCP8.5", "B_RCP4.5", "B_RCP8.5", "D_RCP4.5", "D_RCP8.5"];
+ajot = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
 ajotied = ["A002", "A005", "B002", "B005", "D002", "D005"];
 
 T0 = 1;
@@ -47,12 +46,14 @@ for aind in range(len(ajot)):
     
     A1 = A[:,aind];
     subplot(3,2,aind+1);
-    plot(Tpiste, pa, 'o', markersize=2);
-    plot(Tarr, A1);
+    plot(Tpiste, pa, 'o', markersize=3, color='deepskyblue');
+    plot(Tarr, A1, color='r');
     xlim(left=0)
-    xlabel("toistumisaika (vuotta)");
-    ylabel(u"pinta-ala $(km^2)$");
-    title('%s %i – %i' %(ajot[aind], vuosi0, vuosi0+aika-1));
+    xlabel("toistumisaika (vuotta)", fontsize=11);
+    ylabel(u"pinta-ala $(km^2)$", fontsize=11);
+    title('%s' %(ajot[aind]));
+
+suptitle('Pinta-alat vuosina %i – %i' %(vuosi0, vuosi0+aika-1));
 tight_layout(h_pad=1);
 if 1:
     show();
