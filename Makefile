@@ -10,3 +10,6 @@ maksimit: paksuudetmaks
 
 paksuudetmaks:
 	gcc -g -o paksuudetmaks.out paksuudetmaks.c -O0
+
+ajankohdat:
+	gcc -g -o ajankohdat.out ajankohdat.c
