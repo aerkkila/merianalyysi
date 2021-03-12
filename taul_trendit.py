@@ -55,7 +55,7 @@ for p in range(len(paikat)):
         elif(muuttuja == "ajankohdat"):
             tiednimi = "%s%s_%s_%s.txt" %(sk, paikat[p], ajot[a], muuttuja);
         data = np.genfromtxt(tiednimi);
-        suure = data[:,0];
+        suure = data[:,sarake];
         vuosi = data[:,2];
 
         #jäätymisajankohdasta poistetaan jäätymättömät talvet
