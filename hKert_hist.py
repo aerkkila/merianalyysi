@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 
-from __future__ import division
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
 
-### Kuvaajan piitäminen paksuuden kertymätodennäköisyyksistä ###
+### Kuvaajan piirtäminen paksuuden kertymätodennäköisyyksistä ###
 hnnotTied = '/home/aerkkila/a/Perämeren_jäänpaksuus_1912_2019.csv'
 alkuvuosi = 1975;
 loppuvuosi = 2006; #ensimmäinen, jota ei ole
