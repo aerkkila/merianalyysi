@@ -10,10 +10,10 @@ import pymannkendall as mk
 import locale
 locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
-muuttuja = "ajankohdat" #icevolume tai ajankohdat
-sarake = 1; #paksuus tai alku --> 0, jäätalven pituus --> 1
+muuttuja = "icevolume" #icevolume tai ajankohdat
+sarake = 0; #paksuus tai alku --> 0, jäätalven pituus --> 1
 pns = 0; #pienin neliösumma vai theil-senn
-historia = 0; #skenaariot vai historia-ajo
+historia = 1; #skenaariot vai historia-ajo
 
 if historia:
     ajot = ("A001", "B001", "D001");
@@ -32,19 +32,16 @@ else:
 
 ft = open("/home/aerkkila/a/taul_%sTrendit%s.txt"
           %(ulostunniste, "Hist" if historia else ""), "w");
-if(historia):
-    ft.write( (" & %s"*2 + " & %s \\\\\n\\hline\n") %(ajonimet) );
-else:
-    ft.write( ("%s & %s" + " &"*2 + " & %s" + " &"*2 + " \\\\\n") %("RCP", "4.5", "8.5") );
-    ft.write( (" & %s"*5 + " & %s \\\\\n\\hline\n") %(ajonimet*2) );
-
 fr = open("/home/aerkkila/a/taul_%sStdResid%s.txt"
           %(ulostunniste, "Hist" if historia else ""), "w");
-if(historia):
-    fr.write( (" & %s"*2 + " & %s \\\\\n\\hline\n") %(ajonimet) );
-else:
-    fr.write( ("%s & %s" + " &"*2 + " & %s" + " &"*2 + " \\\\\n") %("RCP", "4.5", "8.5") );
-    fr.write( (" & %s"*5 + " & %s \\\\\n\\hline\n") %(ajonimet*2) );
+
+for tied in (ft, fr):
+    if(historia):
+        tied.write( (" & %s" + " &"*2 + " \\\\\n") %("Historia"));
+        tied.write( (" & %s"*2 + " & %s \\\\\n\\hline\n") %(ajonimet) );
+    else:
+        tied.write( ("%s & %s" + " &"*2 + " & %s" + " &"*2 + " \\\\\n") %("RCP", "4.5", "8.5") );
+        tied.write( (" & %s"*5 + " & %s \\\\\n\\hline\n") %(ajonimet*2) );
 
 for p in range(len(paikat)):
     ft.write("%s" %paikat[p]);

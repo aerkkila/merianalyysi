@@ -5,20 +5,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
+import ctypes
 
-ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
-ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+tiedot = ("jäätymispäivä", "jäätalven_kesto");
+sarake = 0; #kumpi yllä olevista valitaan
+xnimi = tiedot[sarake];
+historia = 0; #historia-ajo vai skenaario
+
+if historia:
+    ajot = ("A001", "B001", "D001");
+    ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+else:
+    ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
+    ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
 sk = "/home/aerkkila/a/pakspaikat/";
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
 aika = 30;
 
-tiedot = ("jäätymispäivä", "jäätalven kesto");
-sarake = 1; #kumpi yllä olevista valitaan
-xnimi = tiedot[sarake];
-
 minimi = 1000.0;
-maksimi = -1000.0; #nämä selitetty alempaan
+maksimi = -1000.0; #nämä selitetty alempana
 
 def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
     for p in range(len(paikat)):
@@ -27,7 +33,8 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
         for a in range(len(ajot)): #malli
             dtmp = np.sort(paikka_ajo[p][a][alku:loppu]);
             F = np.array(range(1,len(dtmp)+1)) / (len(dtmp)+1.0); #kokeellinen kertymäfunktio
-            plt.plot(dtmp, F, color=varit[a], label=ajonimet[a]);
+            kerr = 2 if historia else 1;
+            plt.plot(dtmp, F, color=varit[a*kerr], label=ajonimet[a]);
 
         plt.grid('on');
         plt.title(paikat[p], fontsize=15);
@@ -42,22 +49,22 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
     if 1:
         plt.show();
     else:
-        plt.savefig('/home/aerkkila/a/kuvat1/%s%i.png' %(xnimi,alku));
+        plt.savefig('/home/aerkkila/a/kuvat1/%s%i.png' %(xnimi,vuodet[alku]));
 
 #luetaan malli
 paikka_ajo = [[]]*len(paikat);
 tied = "";
 
-#jos ei jäätä, jäätysmisajankohta on 0x8000 eli negatiivisin numero (int16)
-#rajataan x-akseli minimiin ja maksimiin ilman 0x8000:a
+#jos ei jäätä, jäätysmisajankohta on 0x7fff eli suurin luku (int16)
+#rajataan x-akseli minimiin ja maksimiin
 
 for j in range(len(paikat)):
     paikkatulos = [[]]*len(ajot);
     for i in range(len(ajot)):
         tied = "%s%s_%s_ajankohdat.txt" %(sk, paikat[j], ajot[i]);
         paikkatulos[i] = np.genfromtxt(tied, usecols=(sarake));
-        pieni = np.min(paikkatulos[i][np.where(paikkatulos[i] > -1000)]);
-        iso = np.max(paikkatulos[i]);
+        iso = np.max(paikkatulos[i][np.where(paikkatulos[i] < ctypes.c_int16(0x7fff).value)]);
+        pieni = np.min(paikkatulos[i]);
         if(pieni < minimi):
             minimi = pieni
         if(iso > maksimi):

@@ -99,7 +99,7 @@ int main() {
     ind -= 244;
 
     while(ind>360) { //kun voidaan vielä lukea koko vuosi
-      short d0 = 0x8000; //laitetaan negatiivisin numero, jos ei jäätä
+      short d0 = 0x7fff; //laitetaan positiivisin numero, jos ei jäätä
       short dn = 0;
       for(int i=0; i<366; i++)
 	if(paks1[i] >= paksraja && kons1[i] >= konsraja)
