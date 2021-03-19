@@ -73,7 +73,7 @@ latlon lue_koordtit(char* latlontied) {
 }
 
 float* lue_vuoden_paks(FILE* f, int indeksi, int gridpit) {
-  float* vuoden_paks = calloc(367, sizeof(float));
+  float* vuoden_paks = calloc(366, sizeof(float));
   float* apu = vuoden_paks;
   float turha;
     
@@ -187,8 +187,8 @@ int main(int argc, char** argv) {
 	printf("\r                               ");
 	printf("\r%i / %i\t (paikka %i / %i)", i+1, vuosia, paikka+1, paikkoja);
 	fflush(stdout);
-	for(int j=1; j<=366; j++)
-	  fprintf(fkaikki, "%.3f\t%i\t%i\n", paks[j], j, i+alkuvuosi);
+	for(int j=0; j<366; j++)
+	  fprintf(fkaikki, "%.3f\t%i\t%i\n", paks[j], j+1, i+alkuvuosi);
 	fclose(sis);
 
 	free(paks);
