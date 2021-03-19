@@ -119,7 +119,6 @@ int main(int argc, char** argv) {
   float paikatlat[] = {65.6322, 64.2250, 63.1579, 63.4498, 61.1050, 61.3897};
   float paikatlon[] = {24.4908, 23.6921, 21.2553, 19.6341, 21.4220, 17.1539};
   
-  char muuttuja[] = "icevolume_";
   char ajo[5];
   char tmpnimi[200];
   int alkuvuosi;
@@ -127,7 +126,8 @@ int main(int argc, char** argv) {
   FILE *f;
 
   /*komentorivillä olkoot ensin halutut ajonimet sanojen lopussa ja lopussa alku- ja loppuvuosi*/
-  if(argc < 4) {
+  /*lisäys: alussa muuttuja*/
+  if(argc < 5) {
     printf("Varoitus: yhtään ajoa ei annettu\n");
   }
   if(!sscanf(argv[argc-1], "%i", &loppuvuosi)) {
@@ -140,6 +140,9 @@ int main(int argc, char** argv) {
   }
   if(alkuvuosi > loppuvuosi)
     printf("Varoitus: alkuvuosi = %i, loppuvuosi = %i\n", alkuvuosi, loppuvuosi);
+
+  char* muuttuja = malloc(strlen(argv[1])+1);
+  strcpy(muuttuja, argv[1]);
 
   loppuvuosi++; //olkoon tämä ensimmäinen vuosi, jota ei ole
   int vuosia=loppuvuosi-alkuvuosi;
@@ -160,10 +163,10 @@ int main(int argc, char** argv) {
   }
   fclose(f);
 
-  for (int ajoind=1; ajoind<argc-2; ajoind++) {
+  for (int ajoind=2; ajoind<argc-2; ajoind++) {
     char *apu = argv[ajoind]+strlen(argv[ajoind])-4; //viimeiset neljä ovat esim A001
     strcpy(ajo, apu);
-    printf("\r%s (%i / %i)                      \n", ajo, ajoind, argc-3);
+    printf("\r%s (%i / %i)                      \n", ajo, ajoind-1, argc-4);
 
     int paikkoja = arrpit(paikatlat);
     for(int paikka=0; paikka<paikkoja; paikka++) {
@@ -207,6 +210,7 @@ int main(int argc, char** argv) {
   free(ktit.lat);
   free(ktit.lon);
   free(pind);
+  free(muuttuja);
   putchar('\n');
   return 0;
 }
