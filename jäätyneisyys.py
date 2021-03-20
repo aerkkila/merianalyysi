@@ -5,7 +5,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-historia = 0;
+historia = 1;
 
 if historia:
     ajot = ("A001", "B001", "D001");
@@ -17,10 +17,27 @@ sk = "/home/aerkkila/a/pakspaikat";
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
 aika = 30;
+sigmaGauss = 10/3;
+gaussPit = 10;
+
+#gaussin alipäästösuodatin:
+gaussPaino = lambda t,sigma: 1/(np.sqrt(2*np.pi)*sigma) * np.exp(-0.5 * t**2/sigma**2);
+
+def suodata(a, sigma, suodPit):
+    tulos = np.zeros(len(a));
+    for kohta in range(len(tulos)):
+        if(kohta-suodPit < 0 or kohta+suodPit >= len(tulos)):
+            tulos[kohta] = np.nan;
+        else:
+            s = 0;
+            for T in range(-suodPit, suodPit+1):
+                s += a[kohta-T]*gaussPaino(T,sigma);
+            tulos[kohta] = s;
+    return tulos;
 
 #piirrettäköön kuvaaja 1.11. – 15.6.
-miinuspaiva = 61;
-pluspaiva = 166;
+miinuspaiva = 61+gaussPit;
+pluspaiva = 166+gaussPit;
 
 def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
     kerr = 2 if historia else 1;
@@ -43,18 +60,20 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
                     ind+=1;
             F = np.array(F);
             F = F/(loppuv-alkuv); #nimittäjänä n eikä n+1
+            F = suodata(F, sigmaGauss, gaussPit);
             plt.plot(xPaivat, F, color=varit[aind*kerr], label=ajonimet[aind]);
         plt.grid('on');
         plt.ylim([-0.05, 1.05]);
         plt.title(paikat[pind], fontsize=15);
         plt.ylabel('jään todennäköisyys',fontsize=15);
-        plt.legend(ncol=1, fontsize=11, frameon=0);
+        plt.legend(ncol=1, fontsize=9, frameon=0);
         plt.tight_layout();
     fig.suptitle("%i – %i" %(alkuv+1, loppuv), fontsize=18);
-    if 1:
+    if 0:
         plt.show();
     else:
-        plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys%i.png' %(alkuv+1));
+        plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys%i_gs%i.png'
+                    %(alkuv+1, round(sigmaGauss*3)));
 
 paikka_ajot = [[]]*len(paikat);
 for pind in range(len(paikat)):
@@ -86,10 +105,25 @@ else:
     valiv = alkuv+aika;
     valiv1 = loppuv-aika;
 
-fig = plt.figure(figsize=(12,10));
-piirraKuva(paikka_ajot, alkuv, valiv, fig);
-plt.close();
-
-if(loppuv):
+if 1:
     fig = plt.figure(figsize=(12,10));
-    piirraKuva(paikka_ajot, valiv1, loppuv, fig);
+    piirraKuva(paikka_ajot, alkuv, valiv, fig);
+    plt.close();
+
+    if(loppuv):
+        fig = plt.figure(figsize=(12,10));
+        piirraKuva(paikka_ajot, valiv1, loppuv, fig);
+        plt.close();
+
+#kuva vastefunktiosta
+f = np.linspace(0, 1/3);
+y = np.exp(-2*(np.pi*f*sigmaGauss)**2);
+plt.plot(f,y);
+plt.ylabel('Taajuusvaste');
+plt.xlabel('taajuus ($d^{-1}$)');
+plt.title('Alipäästösuodattimen taajuusvaste, σ = %i/3' %round(sigmaGauss*3));
+if 0:
+    plt.show();
+else:
+    plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys_gaussVaste%i.png'
+                %(round(sigmaGauss*3)));
