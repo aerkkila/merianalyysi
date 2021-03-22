@@ -67,9 +67,16 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
             plt.plot(xPaivat, F, color=varit[aind*kerr], label=ajonimet[aind]);
         plt.grid('on');
         plt.ylim([-0.05, 1.05]);
+        #pykäliin päivämäärät
         tikit = np.arange(-50,151,12.5);
         ajat = pd.to_datetime(tikit,unit='D');
         plt.xticks(tikit, ajat.strftime("%e. %b"), rotation=45, fontsize=10);
+        #50 päivän välein korostettu viiva
+        gridx = ax.xaxis.get_gridlines();
+        for i in range(len(gridx)):
+            if i%4==0:
+                gridx[i].set_linewidth(1.5)
+                gridx[i].set_color("k");
         plt.title(paikat[pind], fontsize=15);
         plt.ylabel('jään todennäköisyys',fontsize=15);
         plt.legend(ncol=1, fontsize=9, frameon=0);
