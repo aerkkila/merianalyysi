@@ -4,6 +4,10 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import time
+import locale
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
 
 historia = 1;
 
@@ -51,8 +55,7 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
             w = np.where(paikka_ajot[pind][:,-1] == loppuv)[0];
             loppuind = w[pluspaiva] if(len(w)) else len(paikka_ajot);
             ind = alkuind
-            xPaivat = np.arange(-miinuspaiva,0);
-            xPaivat = np.append(xPaivat, np.arange(1,pluspaiva+1));
+            xPaivat = np.arange(-miinuspaiva,pluspaiva);
             while(ind < loppuind):
                 for d in range(paivia):
                     if(paikka_ajot[pind][ind][aind] == 0):
@@ -64,6 +67,9 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
             plt.plot(xPaivat, F, color=varit[aind*kerr], label=ajonimet[aind]);
         plt.grid('on');
         plt.ylim([-0.05, 1.05]);
+        tikit = np.arange(-50,151,12.5);
+        ajat = pd.to_datetime(tikit,unit='D');
+        plt.xticks(tikit, ajat.strftime("%e. %b"), rotation=45, fontsize=10);
         plt.title(paikat[pind], fontsize=15);
         plt.ylabel('jään todennäköisyys',fontsize=15);
         plt.legend(ncol=1, fontsize=9, frameon=0);
@@ -116,14 +122,15 @@ if 1:
         plt.close();
 
 #kuva vastefunktiosta
-f = np.linspace(0, 1/3);
-y = np.exp(-2*(np.pi*f*sigmaGauss)**2);
-plt.plot(f,y);
-plt.ylabel('Taajuusvaste');
-plt.xlabel('taajuus ($d^{-1}$)');
-plt.title('Alipäästösuodattimen taajuusvaste, σ = %i/3' %round(sigmaGauss*3));
 if 0:
-    plt.show();
-else:
-    plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys_gaussVaste%i.png'
-                %(round(sigmaGauss*3)));
+    f = np.linspace(0, 1/3);
+    y = np.exp(-2*(np.pi*f*sigmaGauss)**2);
+    plt.plot(f,y);
+    plt.ylabel('Taajuusvaste');
+    plt.xlabel('taajuus ($d^{-1}$)');
+    plt.title('Alipäästösuodattimen taajuusvaste, σ = %i/3' %round(sigmaGauss*3));
+    if 0:
+        plt.show();
+    else:
+        plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys_gaussVaste%i.png'
+                    %(round(sigmaGauss*3)));
