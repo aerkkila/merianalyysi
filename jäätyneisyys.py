@@ -9,7 +9,7 @@ import time
 import locale
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
 
-historia = 1;
+historia = 0;
 
 if historia:
     ajot = ("A001", "B001", "D001");

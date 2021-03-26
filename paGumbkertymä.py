@@ -8,11 +8,12 @@ sk = '/home/aerkkila/a/pintaalat_15_1/';
 uk = '/home/aerkkila/a/kuvat1/';
 
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ["A_RCP4.5", "A_RCP8.5", "B_RCP4.5", "B_RCP8.5", "D_RCP4.5", "D_RCP8.5"];
+ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
 aika = -1;
 vuosi0 = 2006; #käytetään toistaiseksi vain nimeämiseen
+kuvakoko = (10,10);
 
-figure(figsize=(12,10));
+figure(figsize=kuvakoko);
 for aind in range(len(ajot)):
     data = np.genfromtxt(sk + 'pa_' + ajot[aind] + '_maks.txt', usecols=[0]);
     if(aika < 0):
@@ -29,21 +30,30 @@ for aind in range(len(ajot)):
             raja = tmp;
             break;
 
-    F = -1*np.log(-1*np.log(F));
-    a, b, r, p, kkv = st.linregress(pa[0:raja], F[0:raja]);
+    Fg = -1*np.log(-1*np.log(F));
+    a, b, r, p, kkv = st.linregress(pa[0:raja], Fg[0:raja]);
 
     print('%s\t%.4e\t%.4f' %(ajot[aind],a,b));
     
-    subplot(3,2,aind+1);
-    plot(pa[0:raja], F[0:raja], 'o', color='b'); #huomioidut pisteet
+    subplot(4,3,aind+(1 if aind < 3 else 4));
+    plot(pa[0:raja], Fg[0:raja], 'o', color='deepskyblue'); #huomioidut pisteet
+    plot(pa[raja:], Fg[raja:], 'o', color='r'); #ei-huomioidut pisteet
+    plot(pa, a*pa+b, color='olive');
+    title("%s; $r^2$ = %.4f" %(ajonimet[aind], r**2));
+    xlabel("pinta-ala (km²)");
+    ylabel("-ln(-ln(F(A)))");
+
+    subplot(4,3,aind+(4 if aind < 3 else 7));
+    plot(pa[0:raja], F[0:raja], 'o', color='deepskyblue'); #huomioidut pisteet
     plot(pa[raja:], F[raja:], 'o', color='r'); #ei-huomioidut pisteet
-    plot(pa, a*pa+b, label='y = %.4e*x + %.4f\n$σ_{res} = %.3f$' %(a,b, np.std(F-(a*pa+b))) );
-    title(u'%s %i – %i\nR² = %.4f' %(nimet[aind], vuosi0, vuosi0+aika-1, r**2));
-    legend(loc='upper left');
+    plot(pa, np.exp(-np.exp(-a*pa-b)), color='olive');
+    title("%s; $σ_{res} = %.3f$" %(ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b))))));
     xlabel(u'pinta-ala (km²)');
-    ylabel(u'-ln(-ln(F(A)))');
+    ylabel("Todennäsöisyyskertymä F");
+    
+suptitle("%i – %i" %(vuosi0, vuosi0+aika-1));
 tight_layout(h_pad=1);
 if 1:
     show();
 else:
-    savefig(uk+'pa_gumbel_kokoaika_15_1.png');
+    savefig(uk+'paGumbsovit15_1.png');
