@@ -9,7 +9,7 @@ sk = '/home/aerkkila/a/pakoodi/';
 tied = "gumbelkertoimet_kokoaika_"+jaaraja+".txt";
 uk = '/home/aerkkila/a/kuvat1/';
 
-skdat = '/home/aerkkila/a/pintaalat_15_1/';
+skdat = '/home/aerkkila/a/pintaalat_%s/' %jaaraja;
 
 vuosi0 = 2006; #käytetään vain nimeämiseen
 
@@ -21,21 +21,24 @@ pa_l = lambda T: (-log(-log(1/T))-b) / a;
 #Tässä oletetaan ajojärjestys tiedostossa
 ajot = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
 ajotied = ["A002", "A005", "B002", "B005", "D002", "D005"];
+varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 
-T0 = 1;
-T1 = 121;
+T0 = 1.05;
+T1 = 100;
 vuosi0 = 2006;
 aika = 54;
 
 #pinta-alat kaikista toistumisajoista
 #a ja b ovat taulkoita, joten tässä on kaikki ajot
-Tarr = np.array(range(T0, T1));
-A = [[]]*(T1-T0);
-for T in Tarr:
-    A[T-T0] = pa_l(T);
+Tarr = np.geomspace(T0, T1, num=200);
+A = [[]]*len(Tarr);
+for i in range(len(Tarr)):
+    A[i] = pa_l(Tarr[i]);
 A = np.array(A);
 
-figure(figsize=(12,10));
+fig2 = figure(2,figsize=(6,4));
+sp2 = fig2.add_subplot(111);
+fig1 = figure(1,figsize=(10,8));
 for aind in range(len(ajot)):
     
     #haetaan kertymäfunktio mallista
@@ -45,17 +48,30 @@ for aind in range(len(ajot)):
     Tpiste = 1/F;
     
     A1 = A[:,aind];
-    subplot(3,2,aind+1);
+    fig1.add_subplot(3,2,aind+1);
     plot(Tpiste, pa, 'o', markersize=3, color='deepskyblue');
     plot(Tarr, A1, color='r');
-    xlim(left=0)
+    ylim(top=105000);
+    xscale('log',base=10)
+    title(ajot[aind]);
     xlabel("toistumisaika (vuotta)", fontsize=11);
-    ylabel(u"pinta-ala $(km^2)$", fontsize=11);
-    title('%s' %(ajot[aind]));
+    ylabel("pinta-ala $(km^2)$", fontsize=11);
+    sp2.plot(Tarr, A1, color=varit[aind], label=ajot[aind]);
 
-suptitle('Pinta-alat vuosina %i – %i' %(vuosi0, vuosi0+aika-1));
+figure(1);
+suptitle('Tilastolliset jään pinta-alat Pohjanlahdella vuosina %i – %i' %(vuosi0, vuosi0+aika-1));
 tight_layout(h_pad=1);
+figure(2);
+title('Tilastolliset pinta-alat vuosina %i – %i' %(vuosi0, vuosi0+aika-1));
+xlabel("toistumisaika (vuotta)", fontsize=11);
+ylabel("pinta-ala $(km^2)$");
+tight_layout();
+legend();
+ylim(top=105000);
 if 1:
     show();
 else:
-    savefig(uk + "pa_x_"+jaaraja+".png");
+    figure(2);
+    savefig(uk + "paToistumisajat%s.png" %jaaraja);
+    figure(1);
+    savefig(uk + "paToistumisajatErikseen%s.png" %jaaraja);
