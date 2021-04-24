@@ -5,6 +5,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
+import locale
+import matplotlib.ticker as ticker
+
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
+paikallistaja = ticker.ScalarFormatter(useLocale=True);
+def paikallista_akselit(x=1,y=1):
+    if x:
+        plt.gca().xaxis.set_major_formatter(paikallistaja);
+    if y:
+        plt.gca().yaxis.set_major_formatter(paikallistaja);
 
 ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
 ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
@@ -25,9 +35,10 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
 
         plt.grid('on');
         plt.title(paikat[p], fontsize=15);
+        paikallista_akselit();
         plt.ylim(0,1);
         plt.xlim(0,110);
-        plt.ylabel('Kertymätodennäköisyys',fontsize=15);
+        plt.ylabel('Todennäköisyyskertymä',fontsize=15);
         plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15);
         if(paikat[p] == "Kemi"):
             legsij = 'upper left';

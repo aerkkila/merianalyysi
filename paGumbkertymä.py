@@ -3,6 +3,16 @@
 from matplotlib.pyplot import *
 import numpy as np
 import scipy.stats as st
+import locale
+import matplotlib.ticker as ticker
+
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
+paikallistaja = ticker.ScalarFormatter(useLocale=True);
+def paikallista_akselit(x=1,y=1):
+    if x:
+        gca().xaxis.set_major_formatter(paikallistaja);
+    if y:
+        gca().yaxis.set_major_formatter(paikallistaja);
 
 sk = '/home/aerkkila/a/pintaalat_15_1/';
 uk = '/home/aerkkila/a/kuvat1/';
@@ -39,17 +49,18 @@ for aind in range(len(ajot)):
     plot(pa[0:raja], Fg[0:raja], 'o', color='deepskyblue'); #huomioidut pisteet
     plot(pa[raja:], Fg[raja:], 'o', color='r'); #ei-huomioidut pisteet
     plot(pa, a*pa+b, color='olive');
-    title("%s; $r^2$ = %.4f" %(ajonimet[aind], r**2));
-    xlabel("pinta-ala (km²)");
+    title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
+    xlabel("pinta-ala ($km^2$)");
     ylabel("-ln(-ln(F(A)))");
 
     subplot(4,3,aind+(4 if aind < 3 else 7));
     plot(pa[0:raja], F[0:raja], 'o', color='deepskyblue'); #huomioidut pisteet
     plot(pa[raja:], F[raja:], 'o', color='r'); #ei-huomioidut pisteet
     plot(pa, np.exp(-np.exp(-a*pa-b)), color='olive');
-    title("%s; $σ_{res} = %.3f$" %(ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b))))));
-    xlabel(u'pinta-ala (km²)');
-    ylabel("Todennäsöisyyskertymä F");
+    title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))));
+    xlabel(u'pinta-ala ($km^2$)');
+    ylabel("F",rotation=0);
+    paikallista_akselit();
     
 suptitle("%i – %i" %(vuosi0, vuosi0+aika-1));
 tight_layout(h_pad=1);

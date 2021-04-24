@@ -9,6 +9,16 @@
 import numpy as n
 from matplotlib.pyplot import *
 from matplotlib.colors import ListedColormap
+import locale
+import matplotlib.ticker as ticker
+
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
+paikallistaja = ticker.ScalarFormatter(useLocale=True);
+def paikallista_akselit(x=1,y=1):
+    if x:
+        gca().xaxis.set_major_formatter(paikallistaja);
+    if y:
+        gca().yaxis.set_major_formatter(paikallistaja);
 
 jaaraja = "15_1";
 uk = '/home/aerkkila/a/kuvat1/';
@@ -71,6 +81,7 @@ for aind in range(len(ajot)):
     ax2 = gca().twinx();
     ax2.plot(v,r2, color='w');
     ylabel("$R^2$", rotation=0);
+    paikallista_akselit();
     ylim([0.92, 1])
     
 tight_layout(h_pad=1);

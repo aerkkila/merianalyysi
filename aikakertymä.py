@@ -6,11 +6,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
 import ctypes
+import locale
+import matplotlib.ticker as ticker
+
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
+paikallistaja = ticker.ScalarFormatter(useLocale=True);
+def paikallista_akselit(x=1,y=1):
+    if x:
+        plt.gca().xaxis.set_major_formatter(paikallistaja);
+    if y:
+        plt.gca().yaxis.set_major_formatter(paikallistaja);
 
 tiedot = ("jäätymispäivä", "jäätalven_kesto");
-sarake = 0; #kumpi yllä olevista valitaan
+sarake = 1; #kumpi yllä olevista valitaan
 xnimi = tiedot[sarake];
-historia = 0; #historia-ajo vai skenaario
+historia = 1; #historia-ajo vai skenaario
 
 if historia:
     ajot = ("A001", "B001", "D001");
@@ -38,9 +48,10 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
 
         plt.grid('on');
         plt.title(paikat[p], fontsize=15);
+        paikallista_akselit();
         plt.ylim(0,1);
         plt.xlim(minimi, maksimi);
-        plt.ylabel('Kertymätodennäköisyys',fontsize=15);
+        plt.ylabel('Todennäköisyyskertymä',fontsize=15);
         plt.xlabel(xnimi,fontsize=15);
         plt.legend(ncol=1, fontsize=11, frameon=0);
         plt.tight_layout();

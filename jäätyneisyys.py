@@ -3,11 +3,19 @@
 ### kuvaajat jäätyneenä olemisen todennäköisyydestä vuoden kuluessa ###
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
 import time
 import locale
+
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
+paikallistaja = ticker.ScalarFormatter(useLocale=True);
+def paikallista_akselit(x=1,y=1):
+    if x:
+        plt.gca().xaxis.set_major_formatter(paikallistaja);
+    if y:
+        plt.gca().yaxis.set_major_formatter(paikallistaja);
 
 historia = 0;
 
@@ -79,6 +87,7 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
                 gridx[i].set_color("k");
         plt.title(paikat[pind], fontsize=15);
         plt.ylabel('jään todennäköisyys',fontsize=15);
+        paikallista_akselit(0,1);
         plt.legend(ncol=1, fontsize=9, frameon=0);
         plt.tight_layout();
     fig.suptitle("%i – %i" %(alkuv+1, loppuv), fontsize=18);
@@ -129,12 +138,13 @@ if 1:
         plt.close();
 
 #kuva vastefunktiosta
-if 0:
+if 1:
     f = np.linspace(0, 1/3);
     y = np.exp(-2*(np.pi*f*sigmaGauss)**2);
     plt.plot(f,y);
     plt.ylabel('Taajuusvaste');
     plt.xlabel('taajuus ($d^{-1}$)');
+    paikallista_akselit();
     plt.title('Alipäästösuodattimen taajuusvaste, σ = %i/3' %round(sigmaGauss*3));
     if 0:
         plt.show();

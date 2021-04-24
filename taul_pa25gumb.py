@@ -4,6 +4,8 @@
 
 import numpy as np
 import scipy.stats as st
+import locale
+locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
 
 sk = '/home/aerkkila/a/pintaalat_15_1/';
 uk = '/home/aerkkila/a/';
@@ -26,8 +28,8 @@ for aind in range(len(ajot)):
     a, b, r, p, kkv = st.linregress(pa[0:raja], F[0:raja]);
 
     if(aind % 2 == 0):
-        f.write("%s & %.3f & " %(nimet[aind//2], r**2));
+        f.write(locale.format_string("%s & %.3f & ", (nimet[aind//2], r**2)));
     else:
-        f.write("%.3f \\\\\n" %r**2);
+        f.write(locale.format_string("%.3f \\\\\n", r**2));
 
 f.close();
