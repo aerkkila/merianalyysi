@@ -10,16 +10,17 @@ import pymannkendall as mk
 import locale
 locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
-muuttuja = "icevolume" #icevolume tai ajankohdat
-sarake = 0; #paksuus tai alku --> 0, jäätalven pituus --> 1
+muuttuja = "ajankohdat" #icevolume tai ajankohdat
+sarake = 1; #paksuus tai alku --> 0, jäätalven pituus --> 1
 pns = 0; #pienin neliösumma vai theil-senn
-historia = 1; #skenaariot vai historia-ajo
+historia = 0; #skenaariot vai historia-ajo
 
 if historia:
     ajot = ("A001", "B001", "D001");
 else:
     ajot = ("A002", "B002", "D002", "A005", "B005", "D005");
 ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+ajonimet2 = ("MP", "EC", "HC");
 sk = "/home/aerkkila/a/pakspaikat/";
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
 
@@ -41,7 +42,7 @@ for tied in (ft, fr):
         tied.write( (" & %s"*2 + " & %s \\\\\n\\hline\n") %(ajonimet) );
     else:
         tied.write( ("%s & %s" + " &"*2 + " & %s" + " &"*2 + " \\\\\n") %("RCP", "4.5", "8.5") );
-        tied.write( (" & %s"*5 + " & %s \\\\\n\\hline\n") %(ajonimet*2) );
+        tied.write( (" & %s"*5 + " & %s \\\\\n\\hline\n") %(ajonimet2*2) );
 
 for p in range(len(paikat)):
     ft.write("%s" %paikat[p]);

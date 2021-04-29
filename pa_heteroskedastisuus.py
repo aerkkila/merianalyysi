@@ -9,7 +9,7 @@ locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
 jaaraja = "15_1" #peittävyys_paksuus
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ["A: 4.5", "A: 8.5", "B: 4.5", "B: 8.5", "D: 4.5", "D: 8.5"];
+nimet = ("Max Planck", "EC-Earth", "Hadley Center");
 
 sk = '/home/aerkkila/a/pintaalat_'+jaaraja+'/';
 
@@ -27,12 +27,12 @@ for aind in range(len(ajot)):
     bp[aind] = sms.het_breuschpagan(fit.resid, fit.model.exog)[1];
     
 f = open("/home/aerkkila/a/pa_heteroskedastisuus.txt", "w");
+f.write("& RCP 4.5 & RCP 8.5 \\\\\n\\hline\n");
 
 for aind in range(len(ajot)):
-    f.write(" & %s" %nimet[aind]);
-f.write(" \\\\\n\\hline\np-arvo");
-for aind in range(len(ajot)):
-    f.write(locale.format_string(" & %.4f", bp[aind]));
-f.write("\\\\\n");
+    if(aind % 2 == 0):
+        f.write(locale.format_string("%s & %.4f & ", (nimet[aind//2], bp[aind])));
+    else:
+        f.write(locale.format_string("%.4f \\\\\n", bp[aind]));
 
 f.close();
