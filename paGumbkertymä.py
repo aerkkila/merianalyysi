@@ -50,16 +50,16 @@ for aind in range(len(ajot)):
     plot(pa[raja:], Fg[raja:], 'o', color='r'); #ei-huomioidut pisteet
     plot(pa, a*pa+b, color='olive');
     title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
-    xlabel("pinta-ala ($km^2$)");
-    ylabel("-ln(-ln(F(A)))");
+    xlabel("pinta-ala ($km^2$)", fontsize=11);
+    ylabel("-ln(-ln(F(A)))", fontsize=12);
 
     subplot(4,3,aind+(4 if aind < 3 else 7));
     plot(pa[0:raja], F[0:raja], 'o', color='deepskyblue'); #huomioidut pisteet
     plot(pa[raja:], F[raja:], 'o', color='r'); #ei-huomioidut pisteet
     plot(pa, np.exp(-np.exp(-a*pa-b)), color='olive');
     title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))));
-    xlabel(u'pinta-ala ($km^2$)');
-    ylabel("F",rotation=0);
+    xlabel(u'pinta-ala ($km^2$)', fontsize=11);
+    ylabel("F",rotation=0, fontsize=12);
     paikallista_akselit();
     
 suptitle("%i – %i" %(vuosi0, vuosi0+aika-1));

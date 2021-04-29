@@ -20,7 +20,7 @@ def paikallista_akselit(x=1,y=1):
 tiedot = ("jäätymispäivä", "jäätalven_kesto");
 sarake = 1; #kumpi yllä olevista valitaan
 xnimi = tiedot[sarake];
-historia = 1; #historia-ajo vai skenaario
+historia = 0; #historia-ajo vai skenaario
 
 if historia:
     ajot = ("A001", "B001", "D001");
@@ -53,6 +53,8 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
         plt.xlim(minimi, maksimi);
         plt.ylabel('Todennäköisyyskertymä',fontsize=15);
         plt.xlabel(xnimi,fontsize=15);
+        plt.xticks(fontsize=13)
+        plt.yticks(fontsize=13)
         plt.legend(ncol=1, fontsize=11, frameon=0);
         plt.tight_layout();
     fig.suptitle("%i – %i" %(vuodet[alku], vuodet[loppu-1]), fontsize=18);

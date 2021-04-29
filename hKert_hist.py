@@ -71,6 +71,8 @@ for p in range(len(paikat)):
     plt.xlim(0,110)
     plt.ylabel('Todennäköisyyskertymä',fontsize=15)
     plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15)
+    plt.yticks(fontsize=13);
+    plt.xticks(fontsize=13);
     plt.legend(ncol=1, fontsize=11, loc='upper left', frameon=0);
     plt.tight_layout();
 

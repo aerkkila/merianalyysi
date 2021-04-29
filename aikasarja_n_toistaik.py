@@ -43,13 +43,14 @@ for aind in range(len(ajot)):
     subplot(3,2,aind+1);
     plot(v, A, color='k');
     grid('on')
-    xlabel("vuosiluku");
-    ylabel("pinta-ala ($km^2$)");
-    #ylim([5000, 75000])
+    xlabel("vuosi", fontsize=15);
+    ylabel("pinta-ala ($km^2$)", fontsize=15);
+    yticks(fontsize=13);
+    xticks(fontsize=13);
     title('%s' %(nimet[aind]));
     
 tight_layout(h_pad=1);
-if 0:
+if 1:
     show();
 else:
     savefig(uk + "pa_viivat"+jaaraja+".png");

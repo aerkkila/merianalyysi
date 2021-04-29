@@ -40,6 +40,8 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
         plt.xlim(0,110);
         plt.ylabel('Todennäköisyyskertymä',fontsize=15);
         plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15);
+        plt.yticks(fontsize=13);
+        plt.xticks(fontsize=13);
         if(paikat[p] == "Kemi"):
             legsij = 'upper left';
         else:

@@ -78,7 +78,8 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
         #pykäliin päivämäärät
         tikit = np.arange(-50,151,12.5);
         ajat = pd.to_datetime(tikit,unit='D');
-        plt.xticks(tikit, ajat.strftime("%e. %b"), rotation=45, fontsize=10);
+        plt.xticks(tikit, ajat.strftime("%e. %b"), rotation=45, fontsize=11);
+        plt.yticks(fontsize=12)
         #50 päivän välein korostettu viiva
         gridx = ax.xaxis.get_gridlines();
         for i in range(len(gridx)):
@@ -91,7 +92,7 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
         plt.legend(ncol=1, fontsize=9, frameon=0);
         plt.tight_layout();
     fig.suptitle("%i – %i" %(alkuv+1, loppuv), fontsize=18);
-    if 0:
+    if 1:
         plt.show();
     else:
         plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys%i_gs%i.png'
@@ -142,8 +143,10 @@ if 1:
     f = np.linspace(0, 1/3);
     y = np.exp(-2*(np.pi*f*sigmaGauss)**2);
     plt.plot(f,y);
-    plt.ylabel('Taajuusvaste');
-    plt.xlabel('taajuus ($d^{-1}$)');
+    plt.ylabel('Taajuusvaste', fontsize=13);
+    plt.xlabel('taajuus ($d^{-1}$)', fontsize=13);
+    plt.xticks(fontsize=13)
+    plt.yticks(fontsize=13)
     paikallista_akselit();
     plt.title('Alipäästösuodattimen taajuusvaste, σ = %i/3' %round(sigmaGauss*3));
     if 0:

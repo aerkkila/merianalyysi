@@ -75,12 +75,15 @@ for aind in range(len(ajot)):
 
     subplot(3,2,aind+1);
     kuva = imshow(A, cmap=vkartta, aspect='auto', extent=rajat, vmin=A0, vmax=A1);
-    xlabel("vuosiluku");
-    ylabel("toistumisaika (vuotta)");
-    title('%s' %(nimet[aind]));
+    xlabel("vuosi", fontsize=15);
+    ylabel("toistumisaika (vuotta)", fontsize=15);
+    yticks(fontsize=13);
+    xticks(fontsize=13);
+    title('%s' %(nimet[aind]), fontsize=15);
     ax2 = gca().twinx();
     ax2.plot(v,r2, color='w');
-    ylabel("$R^2$", rotation=0);
+    ylabel("$r^2$", rotation=0, fontsize=15);
+    yticks(fontsize=13);
     paikallista_akselit();
     ylim([0.92, 1])
     
@@ -104,10 +107,11 @@ imshow(palkki, cmap=vkartta, vmin=A0, vmax=A1);
 ax = gca();
 ax.set_xticks([]);
 ytikit = n.array([A0, 15000, 20000, 25000, 35000, 50000, 60000, A1]);
+yticks(fontsize=15)
 ytiknorm = (ytikit - A0) / (A1 - A0) * 255;
 ax.set_yticks(ytiknorm);
 ax.set_yticklabels(ytikit);
-ylabel("pinta-ala ($km^2$)");
+ylabel("pinta-ala ($km^2$)", fontsize=15);
 tight_layout();
 
 if not tallenna:

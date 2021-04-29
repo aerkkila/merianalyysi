@@ -25,12 +25,12 @@ for aind in range(len(ajot)):
     plot(vuodet,pa,'o', color='deepskyblue');
     plot(vuodet, a*vuodet+b, color='r');
     title(locale.format_string("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f",
-                               (ajot[aind], p, a/100, np.std(pa-(a*vuodet+b)))));
-    xlabel("vuosi", fontsize=11);
-    ylabel("pinta-ala ($km^2$)", fontsize=11);
+                               (ajot[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12);
+    xlabel("vuosi", fontsize=12);
+    ylabel("pinta-ala ($km^2$)", fontsize=12);
+    xticks(fontsize=12);
+    yticks(fontsize=12);
 
-
-suptitle("Pinta-alat vuosina %i – %i" %(vuodet[0], vuodet[-1]));
 tight_layout(h_pad=1);
 if 1:
     show();

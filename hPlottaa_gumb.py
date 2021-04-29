@@ -49,17 +49,19 @@ for pind in range(len(paikat)):
         F = -1*np.log(-1*np.log(F));
 
         plot(h2[raja:], F[raja:], 'o', color=varit[aind]\
-             , label="%s, $R^2$ = %.3f" %(ajonimet[aind], r2));
+             , label="%s, $r^2$ = %.3f" %(ajonimet[aind], r2));
         plot(h2[:raja], F[:raja], '.', color=varit[aind]);
         plot(h2, h2*a+b, color=varit[aind]);
-        xlabel("$h^2$ ($cm^2$)");
-        ylabel("-ln(-ln(F))");
+        xlabel("$h^2$ ($cm^2$)", fontsize=13);
+        ylabel("-ln(-ln(F))", fontsize=13);
+        yticks(fontsize=13);
+        xticks(fontsize=13);
         title("%s" %(paikat[pind]));
-        legend();
+        legend(fontsize=10, frameon=0);
 
 suptitle("%s %i – %i" %(skenaario, vuosi-(n-1)//2, vuosi+n//2));
 tight_layout(h_pad=1);
-if 1:
+if 0:
     show();
 else:
     savefig(uk+"hGumbsovit.png");
