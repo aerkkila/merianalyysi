@@ -10,7 +10,7 @@ dalku = 244; #päivä, jolloin vuosi vaihtuu
 nimet = ("MP", "EC", "HC");
 
 def tee_taulukko():
-    ulos = open("/home/aerkkila/a/taul_paksVaiKons.txt", "w");
+    ulos = open("/home/aerkkila/a/taulukot/taul_paksVaiKons.txt", "w");
     ulos.write("RCP & 4.5" + " &"*2 + " & 8.5" + " &"*2 + " \\\\\n");
     ulos.write((" & %s"*6 + " \\\\\n") %(nimet*2));
     for pind in range(len(paikat)):

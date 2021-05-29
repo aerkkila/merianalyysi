@@ -7,13 +7,20 @@ import pandas as pd
 import statsmodels.formula.api as smf
 import statsmodels.stats.api as sms
 import pymannkendall as mk
+import sys
 import locale
 locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
-muuttuja = "ajankohdat" #icevolume tai ajankohdat
-sarake = 1; #paksuus tai alku --> 0, jäätalven pituus --> 1
+muuttuja = sys.argv[1] #icevolume tai ajankohdat
+historia = int(sys.argv[2]); #skenaariot vai historia-ajo
 pns = 0; #pienin neliösumma vai theil-senn
-historia = 0; #skenaariot vai historia-ajo
+if(muuttuja == "icevolume"):
+    sarake = 0;
+elif(muuttuja == "ajankohdat"):
+    sarake = 1;
+else:
+    print("1. argumentti olkoon \"icevolume\" tai \"ajankohdat\"");
+    quit();
 
 if historia:
     ajot = ("A001", "B001", "D001");
@@ -31,9 +38,9 @@ elif sarake == 0:
 else:
     ulostunniste = "pit";
 
-ft = open("/home/aerkkila/a/taul_%sTrendit%s.txt"
+ft = open("/home/aerkkila/a/taulukot/taul_%sTrendit%s.txt"
           %(ulostunniste, "Hist" if historia else ""), "w");
-fr = open("/home/aerkkila/a/taul_%sStdResid%s.txt"
+fr = open("/home/aerkkila/a/taulukot/taul_%sStdResid%s.txt"
           %(ulostunniste, "Hist" if historia else ""), "w");
 
 for tied in (ft, fr):

@@ -26,7 +26,7 @@ for aind in range(len(ajot)):
     #tehdään testit ja tallennetaan muistiin
     bp[aind] = sms.het_breuschpagan(fit.resid, fit.model.exog)[1];
     
-f = open("/home/aerkkila/a/pa_heteroskedastisuus.txt", "w");
+f = open("/home/aerkkila/a/taulukot/pa_heteroskedastisuus.txt", "w");
 f.write("& RCP 4.5 & RCP 8.5 \\\\\n\\hline\n");
 
 for aind in range(len(ajot)):

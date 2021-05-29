@@ -8,7 +8,7 @@ import locale
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
 
 sk = '/home/aerkkila/a/pintaalat_15_1/';
-uk = '/home/aerkkila/a/';
+uk = '/home/aerkkila/a/taulukot/';
 
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
 nimet = ("Max Planck", "EC-Earth", "Hadley Center");

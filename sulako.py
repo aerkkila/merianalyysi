@@ -5,8 +5,9 @@
   # rajoittaako paksuus, peittävyys, vai molemmat ###
 
 import numpy as np
+import sys
 
-historia = 0;
+historia = int(sys.argv[1])
 paksraja = 0.01 - 0.000001;
 konsraja = 0.15 - 0.000001;
 if historia:
