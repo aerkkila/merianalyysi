@@ -4,10 +4,10 @@
 #include <math.h>
 #include <locale.h>
 
-/*Tämä hakee tekstiksi käännetyistä nc-tiedostoista halutuista koordinaateista paksuudet
+/*Tämä hakee tekstiksi käännetyistä nc-tiedostoista halutuista koordinaateista paksuudet tai konsentraatiot
   ja tulostaa aikasarjan tekstitiedostoksi kultakin ajolta
 
-  Komentorivillä annetaan ajojen nimet ja lopussa ensimmäinen ja viimeinen vuosi, esimerkiksi ./paksuudet A001 B001 D001 1975 2005. Tiedostoista icevolume*.nc on oltava jään paksuudet tekstiksi käännettyinä ja tarvitaan myös tiedosto latlon.txt, jossa on ensin jokaisen koordinaattiruudun leveys- ja sitten pituuspiirit joitten viimeistenkin arvojen jälkeen on oltava pilkku ja sitten puolipiste. Muuta ei saa olla.*/
+  Komentorivillä annetaan muuttuja, ajojen nimet ja lopussa ensimmäinen ja viimeinen vuosi, esimerkiksi ./paksuudet icevolume A001 B001 D001 1975 2005. Tiedostoista icevolume*.nc on oltava jään paksuudet tekstiksi käännettyinä ja tarvitaan myös tiedosto latlon.txt, jossa on ensin jokaisen koordinaattiruudun leveys- ja sitten pituuspiirit joitten viimeistenkin arvojen jälkeen on oltava pilkku ja sitten puolipiste. Muuta ei saa olla.*/
 
 typedef struct {
   float* lat;
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
   }
   /*tulostetaan latex-talukko koordinaateista*/
   setlocale(LC_ALL, "fi_FI.utf8");
-  f = fopen("../taul_pakspaikat.txt", "w");
+  f = fopen("../taulukot/taul_pakspaikat.txt", "w");
   fprintf(f, "paikka & koordinaatit\\\\\n\\hline\n");
   for(int i=0; i<arrpit(paikatlat); i++)
     fprintf(f, "%s & %.4f %.4f \\\\\n", paikat[i], ktit.lat[pind[i]], ktit.lon[pind[i]]);
