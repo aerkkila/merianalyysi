@@ -7,11 +7,12 @@
 
 import numpy as n
 from matplotlib.pyplot import *
+import sys
 
 jaaraja = "15_1";
 uk = '/home/aerkkila/a/kuvat1/';
 
-nimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+nimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
 
 #halutut toistumisajat
@@ -50,9 +51,9 @@ for aind in range(len(ajot)):
     title('%s' %(nimet[aind]));
     
 tight_layout(h_pad=1);
-if 1:
-    show();
-else:
+if len(sys.argv)==2 and sys.argv[1]=='1':
     savefig(uk + "pa_viivat"+jaaraja+".png");
+else:
+    show();
 
 close();

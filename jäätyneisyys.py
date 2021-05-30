@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
-import time
+import time, sys
 import locale
 
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
@@ -17,14 +17,14 @@ def paikallista_akselit(x=1,y=1):
     if y:
         plt.gca().yaxis.set_major_formatter(paikallistaja);
 
-historia = 0;
+historia = 1 if len(sys.argv)>2 and sys.argv[2]=='historia' else 0
 
 if historia:
     ajot = ("A001", "B001", "D001");
-    ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+    ajonimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 else:
     ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
-    ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+    ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 sk = "/home/aerkkila/a/pakspaikat";
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
@@ -90,13 +90,13 @@ def piirraKuva(paikka_ajot, alkuv, loppuv, fig):
         plt.ylabel('jään todennäköisyys',fontsize=15);
         paikallista_akselit(0,1);
         plt.legend(ncol=1, fontsize=9, frameon=0);
-        plt.tight_layout();
     fig.suptitle("%i – %i" %(alkuv+1, loppuv), fontsize=18);
-    if 1:
-        plt.show();
-    else:
+    plt.tight_layout();
+    if len(sys.argv)>1 and sys.argv[1]=='1':
         plt.savefig('/home/aerkkila/a/kuvat1/jäätyneisyys%i_gs%i.png'
                     %(alkuv+1, round(sigmaGauss*3)));
+    else:
+        plt.show();
 
 paikka_ajot = [[]]*len(paikat);
 for pind in range(len(paikat)):

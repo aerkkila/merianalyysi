@@ -9,7 +9,7 @@
 import numpy as n
 from matplotlib.pyplot import *
 from matplotlib.colors import ListedColormap
-import locale
+import locale, sys
 import matplotlib.ticker as ticker
 
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
@@ -23,8 +23,10 @@ def paikallista_akselit(x=1,y=1):
 jaaraja = "15_1";
 uk = '/home/aerkkila/a/kuvat1/';
 
-nimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+nimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
+
+tallenna = 1 if len(sys.argv)==2 and sys.argv[1]=='1' else 0
 
 #pienin ja suurin mukaanotettava toistumisaika
 T0 = 2;
@@ -88,7 +90,6 @@ for aind in range(len(ajot)):
     ylim([0.92, 1])
     
 tight_layout(h_pad=1);
-tallenna = 0;
 if not tallenna:
     show();
 else:

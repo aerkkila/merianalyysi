@@ -11,7 +11,7 @@ sk = '/home/aerkkila/a/pintaalat_15_1/';
 uk = '/home/aerkkila/a/taulukot/';
 
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ("Max Planck", "EC-Earth", "Hadley Center");
+nimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 
 f = open(uk + "taul_pa25gumb151.txt", "w");
 f.write("& RCP 4.5 & RCP 8.5 \\\\\n\\hline\n");

@@ -5,7 +5,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
-import ctypes
+import ctypes, sys
 import locale
 import matplotlib.ticker as ticker
 
@@ -17,17 +17,18 @@ def paikallista_akselit(x=1,y=1):
     if y:
         plt.gca().yaxis.set_major_formatter(paikallistaja);
 
-tiedot = ("jäätymispäivä", "jäätalven_kesto");
+tiedot = ("jäätymispäivä", "jäätalven kesto (päivää)");
 sarake = 1; #kumpi yllä olevista valitaan
 xnimi = tiedot[sarake];
+tallnimi = xnimi if sarake==0 else "jäätalven_kesto"
 historia = 0; #historia-ajo vai skenaario
 
 if historia:
     ajot = ("A001", "B001", "D001");
-    ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+    ajonimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 else:
     ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
-    ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+    ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 sk = "/home/aerkkila/a/pakspaikat/";
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
@@ -56,13 +57,13 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
         plt.xticks(fontsize=13)
         plt.yticks(fontsize=13)
         plt.legend(ncol=1, fontsize=11, frameon=0);
-        plt.tight_layout();
     fig.suptitle("%i – %i" %(vuodet[alku], vuodet[loppu-1]), fontsize=18);
+    plt.tight_layout();
 
-    if 1:
-        plt.show();
+    if len(sys.argv)==2 and sys.argv[1]=='1':
+        plt.savefig('/home/aerkkila/a/kuvat1/%s%i.png' %(tallnimi,vuodet[alku]));
     else:
-        plt.savefig('/home/aerkkila/a/kuvat1/%s%i.png' %(xnimi,vuodet[alku]));
+        plt.show();
 
 #luetaan malli
 paikka_ajo = [[]]*len(paikat);

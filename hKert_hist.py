@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
-import locale
+import locale, sys
 import matplotlib.ticker as ticker
 
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
@@ -19,9 +19,9 @@ hnnotTied = '/home/aerkkila/a/Perämeren_jäänpaksuus_1912_2019.csv'
 alkuvuosi = 1975;
 loppuvuosi = 2006; #ensimmäinen, jota ei ole
 ajot = ("A001", "B001", "D001");
-ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+ajonimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 sk = "/home/aerkkila/a/pakspaikat/";
-varit = ("r", "m", "c");
+varit = ("r", "g", "b");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
 paikkaind = (2, 8, 6, 11);
 muuttuja = "icevolume"
@@ -57,8 +57,7 @@ for p in range(len(paikat)):
     if(p < len(paikkaind)): #havainnot
         htmp = np.sort(hnnot[p]);
         F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #kokeellinen kertymäfunktio
-        plt.plot(htmp, F, color='b', label="havainnot");
-        
+        plt.plot(htmp, F, color='k', label="havainnot");        
     for a in range(len(ajot)): #malli
         htmp = np.sort(paikka_ajo[p][a])
         F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #kokeellinen kertymäfunktio
@@ -76,7 +75,7 @@ for p in range(len(paikat)):
     plt.legend(ncol=1, fontsize=11, loc='upper left', frameon=0);
     plt.tight_layout();
 
-if 1:
-    plt.show();
-else:
+if len(sys.argv)==2 and sys.argv[1]=='1':
     plt.savefig('/home/aerkkila/a/kuvat1/pakskert_hist.png');
+else:
+    plt.show();

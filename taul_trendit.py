@@ -26,7 +26,7 @@ if historia:
     ajot = ("A001", "B001", "D001");
 else:
     ajot = ("A002", "B002", "D002", "A005", "B005", "D005");
-ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+ajonimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 ajonimet2 = ("MP", "EC", "HC");
 sk = "/home/aerkkila/a/pakspaikat/";
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");

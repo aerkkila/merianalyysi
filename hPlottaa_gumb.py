@@ -2,6 +2,7 @@
 
 from matplotlib.pyplot import *
 import numpy as np
+import sys
 
 #plotataan halutulta aikaväliltä gumbelsovitus ja mallihavainnot gumbelkoordinaatistossa
 
@@ -14,9 +15,9 @@ uk = "/home/aerkkila/a/kuvat1/";
 
 ajot = ["A002", "B002", "D002"];
 skenaario = "RCP 4.5"
-ajonimet = ("Max Planck", "EC-Earth", "Hadley Center");
+ajonimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
-varit = ("r", "y", "c");
+varit = ("r", "g", "b");
 
 fig = figure(figsize=[12,10]);
 for pind in range(len(paikat)):
@@ -61,7 +62,7 @@ for pind in range(len(paikat)):
 
 suptitle("%s %i – %i" %(skenaario, vuosi-(n-1)//2, vuosi+n//2));
 tight_layout(h_pad=1);
-if 0:
-    show();
-else:
+if len(sys.argv)==2 and sys.argv[1]=='1':
     savefig(uk+"hGumbsovit.png");
+else:
+    show();

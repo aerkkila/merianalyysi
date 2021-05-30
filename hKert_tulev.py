@@ -5,7 +5,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import *
-import locale
+import locale, sys
 import matplotlib.ticker as ticker
 
 locale.setlocale(locale.LC_ALL, "fi_FI.utf8");
@@ -17,7 +17,7 @@ def paikallista_akselit(x=1,y=1):
         plt.gca().yaxis.set_major_formatter(paikallistaja);
 
 ajot = ("A002", "A005", "B002", "B005", "D002", "D005");
-ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 sk = "/home/aerkkila/a/pakspaikat/";
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 paikat = ("Kemi", "Kalajoki", "Mustasaari", "Nordmaling", "Rauma", "Söderhamn");
@@ -47,14 +47,13 @@ def piirraKuva(paikka_ajo, alku, loppu, vuodet, fig):
         else:
             legsij = 'lower right';
         plt.legend(ncol=1, fontsize=11, loc=legsij, frameon=0);
-        plt.tight_layout();
     fig.suptitle("%i – %i" %(vuodet[alku], vuodet[loppu-1]), fontsize=18);
+    plt.tight_layout();
 
-    if 1:
-        plt.show();
-    else:
+    if len(sys.argv)==2 and sys.argv[1]=='1':
         plt.savefig('/home/aerkkila/a/kuvat1/pakskert_tulev%i.png' %alku);
-
+    else:
+        plt.show();
 
 #luetaan malli
 paikka_ajo = [[]]*len(paikat);

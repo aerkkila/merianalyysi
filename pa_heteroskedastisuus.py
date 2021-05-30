@@ -9,7 +9,7 @@ locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
 jaaraja = "15_1" #peittävyys_paksuus
 ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ("Max Planck", "EC-Earth", "Hadley Center");
+nimet = ("Max Planck", "EC-Earth", "Hadley Centre");
 
 sk = '/home/aerkkila/a/pintaalat_'+jaaraja+'/';
 

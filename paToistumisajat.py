@@ -3,10 +3,11 @@
 import numpy as np
 from numpy import log
 from matplotlib.pyplot import *
+import sys
 
 jaaraja = "15_1";
-sk = '/home/aerkkila/a/pakoodi/';
-tied = "gumbelkertoimet_kokoaika_"+jaaraja+".txt";
+sk = '/home/aerkkila/a/gradun_koodeja/';
+tied = "paGumbkertoimet_kokoaika_"+jaaraja+".txt";
 uk = '/home/aerkkila/a/kuvat1/';
 
 skdat = '/home/aerkkila/a/pintaalat_%s/' %jaaraja;
@@ -19,7 +20,7 @@ b = data[:,1];
 pa_l = lambda T: (-log(-log(1/T))-b) / a;
 
 #Tässä oletetaan ajojärjestys tiedostossa
-ajot = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Center 4.5", "Hadley Center 8.5");
+ajot = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5");
 ajotied = ["A002", "A005", "B002", "B005", "D002", "D005"];
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue");
 
@@ -29,7 +30,7 @@ vuosi0 = 2006;
 aika = 54;
 
 #pinta-alat kaikista toistumisajoista
-#a ja b ovat taulkoita, joten tässä on kaikki ajot
+#a ja b ovat taulukoita, joten tässä on kaikki ajot
 Tarr = np.geomspace(T0, T1, num=200);
 A = [[]]*len(Tarr);
 for i in range(len(Tarr)):
@@ -68,10 +69,10 @@ ylabel("pinta-ala $(km^2)$");
 tight_layout();
 legend();
 ylim(top=105000);
-if 1:
-    show();
-else:
+if len(sys.argv) == 2 and sys.argv[1] == '1':
     figure(2);
     savefig(uk + "paToistumisajat%s.png" %jaaraja);
     figure(1);
     savefig(uk + "paToistumisajatErikseen%s.png" %jaaraja);
+else:
+    show();
