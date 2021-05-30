@@ -2,7 +2,7 @@
 
 from matplotlib.pyplot import *
 import numpy as np
-import sys
+import sys, locale
 
 #plotataan halutulta aikaväliltä gumbelsovitus ja mallihavainnot gumbelkoordinaatistossa
 
@@ -50,7 +50,7 @@ for pind in range(len(paikat)):
         F = -1*np.log(-1*np.log(F));
 
         plot(h2[raja:], F[raja:], 'o', color=varit[aind]\
-             , label="%s, $r^2$ = %.3f" %(ajonimet[aind], r2));
+             , label=locale.format_string("%s, $r^2$ = %.3f", (ajonimet[aind], r2)));
         plot(h2[:raja], F[:raja], '.', color=varit[aind]);
         plot(h2, h2*a+b, color=varit[aind]);
         xlabel("$h^2$ ($cm^2$)", fontsize=13);
