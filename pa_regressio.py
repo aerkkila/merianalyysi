@@ -3,9 +3,9 @@
 import numpy as np
 import scipy.stats as st
 from matplotlib.pyplot import *
-import sys, locale, jaettu
+import sys, locale
+from jaettu import *
 
-suomeksi = jaettu.suomeksi
 if(suomeksi):
     locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
     xnimi = 'vuosi'
@@ -13,12 +13,10 @@ if(suomeksi):
 else:
     xnimi = 'year'
     ynimi = 'area ($km^2$)'
-ajot = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5")
-ajotied = ("A002", "A005", "B002", "B005", "D002", "D005")
 
 figure(figsize=(12,10));
 for aind in range(len(ajot)):
-    data = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset, ajotied[aind]))
+    data = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset, ajot[aind]))
     pa = data[:,0]
     vuodet = data[:,2]
 
@@ -29,10 +27,10 @@ for aind in range(len(ajot)):
     plot(vuodet, a*vuodet+b, color='r')
     if(suomeksi):
         title(locale.format_string("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f",
-                                   (ajot[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12)
+                                   (ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12)
     else:
         title("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f" \
-              %(ajot[aind], p, a/100, np.std(pa-(a*vuodet+b))), fontsize=12)
+              %(ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b))), fontsize=12)
         
     xlabel(xnimi, fontsize=12)
     ylabel(ynimi, fontsize=12)

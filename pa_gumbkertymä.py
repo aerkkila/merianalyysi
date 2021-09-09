@@ -6,9 +6,8 @@ import scipy.stats as st
 import sys
 import locale
 import matplotlib.ticker as ticker
-import jaettu
+from jaettu import *
 
-suomeksi = jaettu.suomeksi
 if(suomeksi):
     locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
     paikallistaja = ticker.ScalarFormatter(useLocale=True)
@@ -23,8 +22,6 @@ def kautto():
     print("Käyttö: python3 pa_gumbkertymä.py alkuvuosi loppuvuosi")
     exit()
 
-ajot = ("A002", "A005", "B002", "B005", "D002", "D005")
-ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5")
 kuvakoko = (10,10)
 try:
     vuosi0 = int(sys.argv[1])
@@ -42,7 +39,7 @@ figure(figsize=kuvakoko)
 for aind in range(len(ajot)):
     tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset,ajot[aind]), usecols=[0,2],dtype=int)
     try:
-        tiedos = jaettu.rajaa(tiedos, vuosi0, vuosi1)
+        tiedos = rajaa(tiedos, vuosi0, vuosi1)
     except Exception as e:
         print(str(e))
         kautto()

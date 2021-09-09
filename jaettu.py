@@ -4,6 +4,10 @@ suomeksi = False
 kuvat = '/home/aerkkila/b/kuvat'
 tiedokset = '/home/aerkkila/b/tiedokset'
 
+ajot = ("A002", "A005", "B002", "B005", "D002", "D005")
+ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5")
+varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue")
+
 def rajaa(tiedos, vuosi0, vuosi1):
     tiedos = tiedos[np.where(vuosi0 <= tiedos[:,1])]
     if not len(tiedos):
