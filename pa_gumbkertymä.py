@@ -6,11 +6,9 @@ import scipy.stats as st
 import sys
 import locale
 import matplotlib.ticker as ticker
+import jaettu
 
-suomeksi = False
-sk = '/home/aerkkila/b/tiedokset'
-uk = '/home/aerkkila/b/kuvat'
-
+suomeksi = jaettu.suomeksi
 if(suomeksi):
     locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
     paikallistaja = ticker.ScalarFormatter(useLocale=True)
@@ -42,17 +40,10 @@ ulos = open("pa_gumbkertoimet_%i_%i.txt" %(vuosi0,vuosi1), "w")
 
 figure(figsize=kuvakoko)
 for aind in range(len(ajot)):
-    tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(sk,ajot[aind]), usecols=[0,2],dtype=int)
+    tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset,ajot[aind]), usecols=[0,2],dtype=int)
     try:
-        tiedos = tiedos[np.where(vuosi0 <= tiedos[:,1])]
+        tiedos = jaettu.rajaa(tiedos, vuosi0, vuosi1)
     except Exception as e:
-        print("Ei vuotta %i (%s)" %(vuosi0,ajot[aind]))
-        print(str(e))
-        kautto()
-    try:
-        tiedos = tiedos[np.where(tiedos[:,1] <= vuosi1)]
-    except Exception as e:
-        print("Ei vuotta %i (%s)" %(vuosi1,ajot[aind]))
         print(str(e))
         kautto()
     i = 0
@@ -99,6 +90,6 @@ ulos.close()
 suptitle("%i – %i" %(vuosi0, vuosi1))
 tight_layout(h_pad=1)
 if len(sys.argv) > 3 and sys.argv[3] == '1':
-    savefig('%s/pa_gumbkertymä_%i_%i.png' %(uk, vuosi0, vuosi1))
+    savefig('%s/pa_gumbkertymä_%i_%i.png' %(kuvat, vuosi0, vuosi1))
 else:
     show()
