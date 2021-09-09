@@ -7,26 +7,25 @@ import statsmodels.stats.api as sms
 import locale
 locale.setlocale(locale.LC_ALL, 'fi_FI.utf8');
 
-jaaraja = "15_1" #peittävyys_paksuus
-ajot = ["A002", "A005", "B002", "B005", "D002", "D005"];
-nimet = ("Max Planck", "EC-Earth", "Hadley Centre");
+ajot = ("A002", "A005", "B002", "B005", "D002", "D005")
+nimet = ("Max Planck", "EC-Earth", "Hadley Centre")
 
-sk = '/home/aerkkila/a/pintaalat_'+jaaraja+'/';
+sk = '/home/aerkkila/b/tiedokset'
 
 bp = [0]*6;
 
 for aind in range(len(ajot)):
-    data = np.genfromtxt(sk + 'pa_' + ajot[aind] + '_maks.txt');
-    ala = data[:,0];
-    vuosi = data[:,2];
+    data = np.genfromtxt('%s/pintaalat_%s_maks.txt' %(sk,ajot[aind]))
+    ala = data[:,0]
+    vuosi = data[:,2]
 
-    df = pd.DataFrame({'vuosi': vuosi, 'ala': ala});
-    fit = smf.ols('ala ~ vuosi', data=df).fit();
+    df = pd.DataFrame({'vuosi': vuosi, 'ala': ala})
+    fit = smf.ols('ala ~ vuosi', data=df).fit()
     
     #tehdään testit ja tallennetaan muistiin
-    bp[aind] = sms.het_breuschpagan(fit.resid, fit.model.exog)[1];
+    bp[aind] = sms.het_breuschpagan(fit.resid, fit.model.exog)[1]
     
-f = open("/home/aerkkila/a/taulukot/pa_heteroskedastisuus.txt", "w");
+f = open("/home/aerkkila/b/taulukot/pa_heteroskedastisuus.txt", "w");
 f.write("& RCP 4.5 & RCP 8.5 \\\\\n\\hline\n");
 
 for aind in range(len(ajot)):
