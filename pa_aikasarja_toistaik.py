@@ -50,7 +50,7 @@ for aind in range(len(ajot)):
     if(aikaikk < 0):
         aikaikk = len(tiedos)
     v0 = tiedos[0,1]
-    param = np.zeros((len(tiedos)-aikaikk+1,3))
+    param = np.zeros((len(tiedos)-aikaikk+1,4))
     
     #muodostetaan juokseva aikasarja, jossa on kerrallaan mukana n vuotta
     #kun v on aikaikkunan 1. vuosi, keskiarvon vuodeksi laitetaan v+n/2
@@ -72,7 +72,7 @@ for aind in range(len(ajot)):
         #suoran sovitus sekä suoran parametrien ja vuoden tallentaminen
         a, b, r, p, kkv = st.linregress(pa[0:raja], F[0:raja])
         vuosi = v0+ind+(aikaikk-1)//2
-        param[ind,:] = [a,b,vuosi]
+        param[ind,:] = [a,b,r**2,vuosi]
 
         ind += 1
         if (ind+aikaikk > len(tiedos)):
@@ -89,7 +89,7 @@ for aind in range(len(ajot)):
     A = A.transpose()
 
     subplot(3,2,aind+1)
-    plot(param[:,2], A, color='k')
+    plot(param[:,3], A, color='k')
     grid('on')
     xlabel(xnimi, fontsize=15)
     ylabel(ynimi, fontsize=15)
@@ -97,9 +97,18 @@ for aind in range(len(ajot)):
     xticks(fontsize=13)
     title('%s' %(ajonimet[aind]))
 
+    ax2 = gca().twinx()
+    vari = 'lightskyblue'
+    ax2.plot(param[:,3], param[:,2], color=vari)
+    ylabel('$r^2$', rotation=0, fontsize=15, color=vari)
+    yticks(fontsize=13, color=vari)
+    if suomeksi:
+        paikallista_akselit(0,1)
+    ylim([0.85, 1])
+
 suptitle(ulaotsikko)
 tight_layout(h_pad=1)
 if tallenna:
-    savefig("%s/pa_viivat_%i.png" %(kuvat, aikaikk))
+    savefig("%s/pa_aikasarja_toistaik_%i.png" %(kuvat, aikaikk))
 else:
     show()
