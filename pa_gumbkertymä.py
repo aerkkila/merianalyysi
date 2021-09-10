@@ -10,14 +10,9 @@ from jaettu import *
 
 if(suomeksi):
     locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
-    paikallistaja = ticker.ScalarFormatter(useLocale=True)
-    
-def paikallista_akselit(x=1,y=1):
-    if x:
-        gca().xaxis.set_major_formatter(paikallistaja)
-    if y:
-        gca().yaxis.set_major_formatter(paikallistaja)
-    
+    xnimi = 'pinta-ala $(km^2)$'
+else:
+    xnimi = 'area $(km^2)$'
 def kautto():
     print("Käyttö: python3 pa_gumbkertymä.py alkuvuosi loppuvuosi")
     exit()
@@ -63,25 +58,26 @@ for aind in range(len(ajot)):
     plot(pa[0:raja], Fg[0:raja], 'o', color='deepskyblue') #huomioidut pisteet
     plot(pa[raja:], Fg[raja:], 'o', color='r') #ei-huomioidut pisteet
     plot(pa, a*pa+b, color='olive')
-    title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
-    if(suomeksi):
-        xlabel("pinta-ala ($km^2$)", fontsize=11)
+    if suomeksi:
+        title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
     else:
-        xlabel("area ($km^2$)")
+        title('%s; $r^2$ = %.4f' %(ajonimet[aind], r**2))
+    xlabel(xnimi, fontsize=11)
     ylabel("-ln(-ln(F(A)))", fontsize=12)
 
     subplot(4,3,aind+(4 if aind < 3 else 7))
     plot(pa[0:raja], F[0:raja], 'o', color='deepskyblue') #huomioidut pisteet
     plot(pa[raja:], F[raja:], 'o', color='r') #ei-huomioidut pisteet
     plot(pa, np.exp(-np.exp(-a*pa-b)), color='olive')
-    title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))))
     if(suomeksi):
+        title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))))
         xlabel('pinta-ala ($km^2$)', fontsize=11)
-    else:
-        xlabel('area ($km^2$)', fontsize=11)
-    ylabel("F",rotation=0, fontsize=12)
-    if(suomeksi):
         paikallista_akselit()
+    else:
+        title("%s; $σ_{res}$ = %.3f" %(ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b))))))
+        xlabel('area ($km^2$)', fontsize=11)
+    xlabel(xnimi, fontsize=11)
+    ylabel("F",rotation=0, fontsize=12)
 
 ulos.close()
 suptitle("%i – %i" %(vuosi0, vuosi1))

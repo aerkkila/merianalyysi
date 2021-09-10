@@ -1,4 +1,6 @@
 import numpy as np
+from matplotlib.pyplot import *
+import matplotlib.ticker as ticker
 
 suomeksi = False
 kuvat = '/home/aerkkila/b/kuvat'
@@ -19,3 +21,10 @@ def rajaa(tiedos, vuosi0, vuosi1):
         raise Exception('Vuosi1 epäonnistui: %i, tyhjä tiedos' %vuosi1)
     
     return tiedos
+
+paikallistaja = ticker.ScalarFormatter(useLocale=True)
+def paikallista_akselit(x=1,y=1):
+    if x:
+        gca().xaxis.set_major_formatter(paikallistaja)
+    if y:
+        gca().yaxis.set_major_formatter(paikallistaja)
