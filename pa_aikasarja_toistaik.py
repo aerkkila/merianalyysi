@@ -46,7 +46,7 @@ else:
 figure(figsize=(12,10))
 for aind in range(len(ajot)):
     tiedos = np.loadtxt('%s/pintaalat_%s_maks.txt'\
-                      %(tiedokset, ajot[aind]), usecols=[0,2])
+                      %(pa_kansio, ajot[aind]), usecols=[0,2])
     if(aikaikk < 0):
         aikaikk = len(tiedos)
     v0 = tiedos[0,1]

@@ -32,7 +32,7 @@ ulos = open("pa_gumbkertoimet_%i_%i.txt" %(vuosi0,vuosi1), "w")
 
 figure(figsize=kuvakoko)
 for aind in range(len(ajot)):
-    tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset,ajot[aind]), usecols=[0,2],dtype=int)
+    tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(pa_kansio,ajot[aind]), usecols=[0,2],dtype=int)
     try:
         tiedos = rajaa(tiedos, vuosi0, vuosi1)
     except Exception as e:
