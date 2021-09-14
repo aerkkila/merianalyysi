@@ -10,5 +10,8 @@ paksuudet: paksuudet.c
 peittävyydet: peittävyydet.c
 	gcc -g -Wall peittävyydet.c -std=gnu99 -lnetcdf -lhdf5 -lm -O3
 
-makspaksuudet:  makspaksuudet.c
+makspaksuudet: makspaksuudet.c
 	gcc -Wall makspaksuudet.c -O3
+
+pituudet: pituudet.c
+	gcc -Wall pituudet.c -O3
