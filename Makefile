@@ -15,3 +15,6 @@ makspaksuudet: makspaksuudet.c
 
 pituudet: pituudet.c
 	gcc -Wall pituudet.c -O3
+
+esiintyvyys: esiintyvyys.c
+	gcc -Wall -shared -o esiintyvyys.so esiintyvyys.c -lm -O3

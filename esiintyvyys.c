@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+#include <math.h>
+
+static float* luenta;
+static float *todnak, *tulos;
+static short* vuodet;
+static int paiva0, vuosi0, vuosi1;
+
+void alusta();
+float* esiintyvyys(const char*, float, int);
+void vapauta();
+static float* suodate(int);
+
+void alusta(int p0, int v0, int v1) {
+  paiva0 = p0;
+  vuosi0 = v0; vuosi1 = v1;
+  luenta = malloc(366*(v1-v0+1)*sizeof(float)); //100 vuotta * 366
+  vuodet = malloc(366*(v1-v0+1)*2);
+  todnak = malloc(365*sizeof(float)); //hypätään karkauspäivien yli
+  tulos = malloc(365*sizeof(float));
+}
+
+float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
+  /*paikallistaminen näyttää yhtyvän pythonin kanssa,
+    joten tämä pitää määrittää joka kerralla erikseen*/
+  setlocale(LC_ALL, "en_US.utf8");
+  int pituus;
+  int apui;
+  FILE *f = fopen(tiednimi, "r");
+  if(!f) {
+    printf("Ei avattu tiedostoa: \"%s\"", tiednimi);
+    return NULL;
+  }
+  /*siirrytään ensimmäisen vuoden kohdalle*/
+  fscanf(f, "%*f%*i%hi", vuodet);
+  fseek(f, 0, SEEK_SET);
+  apui = (vuosi0-vuodet[0]-1)*366; //ohitettavia päiviä
+  for(int i=0; i<apui; i++)
+    fscanf(f, "%*[^\n]\n");
+  
+  pituus = (vuosi1-vuosi0+1)*366;
+  for(int i=0; i<pituus; i++)
+    fscanf(f, "%f%*i%hi", luenta+i, vuodet+i);
+  fclose(f);
+  
+  for(int i=0; i<365; i++)
+    todnak[i] = 0;
+  int paivaind = 0;
+  for(int i=(paiva0-gausspit+365)%365; i<pituus; i++) {
+    paivaind %= 365;
+    if(paivaind+paiva0-gausspit == 59 && vuodet[i]%4 == 0)
+      i++; //karkauspäivän ohitus
+    else if(!(luenta[i] == luenta[i])) {
+      if(paivaind+paiva0-gausspit)
+	printf("NAN osui väärälle päivälle: %i\n", paivaind+paiva0-gausspit);
+      i++;
+    }
+    todnak[paivaind] += luenta[i] >= konsraja;
+    paivaind++;
+  }
+  const float kerroin = 366.0/pituus;
+  for(int i=0; i<365; i++)
+    todnak[i] *= kerroin;
+  return suodate(gausspit);
+}
+
+void vapauta() {
+  free(luenta);
+  free(todnak);
+  free(vuodet);
+  free(tulos);
+}
+
+#define KERROIN 0.39894228 // 1/sqrt(2*pi)
+#define SIGMA (gausspit*0.3333333333333)
+#define GAUSSPAINO(t) ( KERROIN/SIGMA * exp(-0.5*(t)*(t)/(SIGMA*SIGMA)) )
+static float gausskert[200];
+
+/*gausspit <= 100*/
+static float* suodate(int gausspit) {
+  float* restrict td = todnak+gausspit;
+  float* gkert = gausskert + 100;
+  for(int t=0; t<=gausspit; t++) {
+    gkert[t] = GAUSSPAINO(t);
+    gkert[-t] = GAUSSPAINO(t);
+  }
+  for(int i=0; i<265; i++) {
+    float summa = 0;
+    for(int T=-gausspit; T<=gausspit; T++)
+      summa += td[i+T]*gkert[T];
+    tulos[i] = summa;
+  }
+  return tulos;
+}
