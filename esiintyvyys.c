@@ -9,6 +9,7 @@ static short* vuodet;
 static int paiva0, vuosi0, vuosi1;
 
 void alusta();
+void siirra_aikaikkunaa(int);
 float* esiintyvyys(const char*, float, int);
 void vapauta();
 static float* suodate(int);
@@ -16,10 +17,15 @@ static float* suodate(int);
 void alusta(int p0, int v0, int v1) {
   paiva0 = p0;
   vuosi0 = v0; vuosi1 = v1;
-  luenta = malloc(366*(v1-v0+1)*sizeof(float)); //100 vuotta * 366
+  luenta = malloc(366*(v1-v0+1)*sizeof(float));
   vuodet = malloc(366*(v1-v0+1)*2);
   todnak = malloc(365*sizeof(float)); //hypätään karkauspäivien yli
   tulos = malloc(365*sizeof(float));
+}
+
+void siirra_aikaikkunaa(int maara) {
+  vuosi0 += maara;
+  vuosi1 += maara;
 }
 
 float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
@@ -30,16 +36,18 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
   int apui;
   FILE *f = fopen(tiednimi, "r");
   if(!f) {
-    printf("Ei avattu tiedostoa: \"%s\"", tiednimi);
+    printf("Ei avattu tiedostoa: \"%s\"\n", tiednimi);
     return NULL;
   }
   /*siirrytään ensimmäisen vuoden kohdalle*/
-  fscanf(f, "%*f%*i%hi", vuodet);
-  fseek(f, 0, SEEK_SET);
-  apui = (vuosi0-vuodet[0]-1)*366; //ohitettavia päiviä
-  for(int i=0; i<apui; i++)
-    fscanf(f, "%*[^\n]\n");
-  
+  fscanf(f, "%*f%*i%hi\n", vuodet);
+  /*rivit ovat yhtä pitkiä*/
+  int rivi = 0;
+  do
+    rivi++;
+  while(fgetc(f) != '\n');
+  apui = (vuosi0-*vuodet)*366; //ohitettavia päiviä
+  fseek(f,apui*rivi,SEEK_SET);
   pituus = (vuosi1-vuosi0+1)*366;
   for(int i=0; i<pituus; i++)
     fscanf(f, "%f%*i%hi", luenta+i, vuodet+i);
@@ -48,7 +56,9 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
   for(int i=0; i<365; i++)
     todnak[i] = 0;
   int paivaind = 0;
-  for(int i=(paiva0-gausspit+365)%365; i<pituus; i++) {
+  int i = paiva0-gausspit+365+!(vuosi0%4);
+  int paate = pituus-366+i;
+  for(int i=paiva0-gausspit+365+!(vuosi0%4); i<paate; i++) {
     paivaind %= 365;
     if(paivaind+paiva0-gausspit == 59 && vuodet[i]%4 == 0)
       i++; //karkauspäivän ohitus
@@ -60,7 +70,7 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
     todnak[paivaind] += luenta[i] >= konsraja;
     paivaind++;
   }
-  const float kerroin = 366.0/pituus;
+  const float kerroin = 366.0/(pituus-366);
   for(int i=0; i<365; i++)
     todnak[i] *= kerroin;
   return suodate(gausspit);
@@ -74,7 +84,7 @@ void vapauta() {
 }
 
 #define KERROIN 0.39894228 // 1/sqrt(2*pi)
-#define SIGMA (gausspit*0.3333333333333)
+#define SIGMA (gausspit*0.33333333333)
 #define GAUSSPAINO(t) ( KERROIN/SIGMA * exp(-0.5*(t)*(t)/(SIGMA*SIGMA)) )
 static float gausskert[200];
 

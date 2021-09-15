@@ -30,11 +30,35 @@ class Lukija:
                                         c_float(konsraja),
                                         c_int(gausspit) )
         tulos = tulos.contents
-        for i in range(paiva1-paiva0):
-            self.tulos[i] = tulos[i]
+        self.tulos = tulos[0:paiva1-paiva0]
         return self.tulos
+    def siirra_aikaikkunaa(self, nvuosia):
+        self.ckirj.siirra_aikaikkunaa(c_int(nvuosia))
+        self.vuosi0 += nvuosia
+        self.vuosi1 += nvuosia
     def __exit__(self, type, value, traceback):
         self.ckirj.vapauta()
+
+def painettaessa(tapaht):
+    global nimet, lukija, konsraja, viivat
+    if tapaht.key == 'left':
+        nvuosia = -1
+    elif tapaht.key == 'right':
+        nvuosia = 1
+    elif tapaht.key == 'down':
+        nvuosia = -5
+    elif tapaht.key == 'up':
+        nvuosia = 5
+    else:
+        return
+    lukija.siirra_aikaikkunaa(nvuosia)
+    tulos = []
+    for ind,nimi in enumerate(nimet):
+        lukija.lue(nimi, konsraja)
+        viivat[ind].set_ydata(lukija.tulos)
+    suptitle(locale.format_string("%i–%i; $3\sigma=$%i\n%s ≥ %4.2f",
+                                  (lukija.vuosi0,lukija.vuosi1,gausspit,konsstr,konsraja)))
+    draw()
 
 try:
     konsraja = float(sys.argv[1])
@@ -58,18 +82,22 @@ fig = figure(figsize=(12,10))
 axs = fig.subplots(3,2).flatten()
 xtikit = np.arange(-50,151,12.5)
 ajat = pd.to_datetime(xtikit, unit='D')
-#figure() vaihtaa paikallistamiseen oletusasetukset
 locale.setlocale(locale.LC_ALL, paikallisuus)
 xnimet = ajat.strftime("%e. %b")
+fig.canvas.mpl_connect('key_press_event', painettaessa)
 
 with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
+    nimet = []
+    viivat = []
     for pind,paikka in enumerate(paikat):
         sca(axs[pind])
         ylim((-0.05, 1.05))
         for aind,ajo in enumerate(ajot):
             nimi = "%s/peittävyydet_%s_%s.txt" %(kansio, paikat_fi[pind], ajo)
+            nimet.append(nimi)
             lukija.lue(nimi, konsraja)
-            plot(xakseli, lukija.tulos, color=varit[aind], label=ajonimet[aind])
+            viiva, = plot(xakseli, lukija.tulos, color=varit[aind], label=ajonimet[aind])
+            viivat.append(viiva)
         grid('on')
         locale.setlocale(locale.LC_ALL, paikallisuus)
         paikallista_akselit(0,1)
@@ -87,7 +115,7 @@ with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
                 g.set_linewidth(1.5)
                 g.set_color('k')
     suptitle(locale.format_string("%i–%i; $3\sigma=$%i\n%s ≥ %4.2f",
-                                  (vuosi0,vuosi1,gausspit,konsstr,konsraja)))
+                                  (lukija.vuosi0,lukija.vuosi1,gausspit,konsstr,konsraja)))
     tight_layout()
     if(sys.argv[-1] == '1'):
         savefig("%s/esiintyvyys%2i_%i_%i.png" %(kuvat,int(konsraja*100),vuosi0,vuosi1))
