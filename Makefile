@@ -13,8 +13,8 @@ peittävyydet: peittävyydet.c
 makspaksuudet: makspaksuudet.c
 	gcc -Wall makspaksuudet.c -O3
 
-pituudet: pituudet.c
-	gcc -Wall pituudet.c -O3
+pituus: pituus.c
+	gcc -Wall pituus.c -O3
 
 esiintyvyys: esiintyvyys.c
 	gcc -Wall -shared -o esiintyvyys.so esiintyvyys.c -lm -O3
