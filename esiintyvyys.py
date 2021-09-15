@@ -10,7 +10,7 @@ import sys, os, locale
 def kautto(virheviesti=''):
     if(len(virheviesti)):
         print("Virhe: %s" %virheviesti)
-    print("Käyttö: ./tämä konsraja alkuvuosi loppuvuosi")
+    print("Käyttö: ./tämä konsraja alkuvuosi loppuvuosi (1, jos tallenna)")
     exit()
 
 class Lukija:
@@ -49,6 +49,11 @@ paiva1 = 166
 xakseli = np.arange(paiva0, paiva1)
 gausspit = 15
 
+if suomeksi:
+    konsstr = 'peittävyys'
+else:
+    konsstr = 'concentration'
+
 fig = figure(figsize=(12,10))
 axs = fig.subplots(3,2).flatten()
 xtikit = np.arange(-50,151,12.5)
@@ -81,6 +86,10 @@ with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
             if i%4==0:
                 g.set_linewidth(1.5)
                 g.set_color('k')
-    suptitle("%i–%i; $3\sigma=$%i" %(vuosi0,vuosi1,gausspit))
+    suptitle(locale.format_string("%i–%i; $3\sigma=$%i\n%s ≥ %4.2f",
+                                  (vuosi0,vuosi1,gausspit,konsstr,konsraja)))
     tight_layout()
-    show()
+    if(sys.argv[-1] == '1'):
+        savefig("%s/esiintyvyys%2i_%i_%i.png" %(kuvat,int(konsraja*100),vuosi0,vuosi1))
+    else:
+        show()
