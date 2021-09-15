@@ -7,7 +7,6 @@ import sys, locale
 from jaettu import *
 
 if(suomeksi):
-    locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
     xnimi = 'vuosi'
     ynimi = 'pinta-ala ($km^2$)'
 else:
@@ -15,8 +14,8 @@ else:
     ynimi = 'area ($km^2$)'
 
 figure(figsize=(12,10));
-for aind in range(len(ajot)):
-    data = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(tiedokset, ajot[aind]))
+for aind,ajo in enumerate(ajot):
+    data = np.genfromtxt("%s/makspintaalat_%s.txt" %(kansio, ajo))
     pa = data[:,0]
     vuodet = data[:,2]
 
@@ -25,13 +24,9 @@ for aind in range(len(ajot)):
     subplot(3,2,aind+1)
     plot(vuodet,pa,'o', color='deepskyblue')
     plot(vuodet, a*vuodet+b, color='r')
-    if(suomeksi):
-        title(locale.format_string("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f",
-                                   (ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12)
-    else:
-        title("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f" \
-              %(ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b))), fontsize=12)
-        
+    locale.setlocale(locale.LC_ALL, paikallisuus)
+    title(locale.format_string("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f",
+                               (ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12)
     xlabel(xnimi, fontsize=12)
     ylabel(ynimi, fontsize=12)
     xticks(fontsize=12)

@@ -8,25 +8,14 @@
 import numpy as np
 import scipy.stats as st
 from matplotlib.pyplot import *
-import sys
+import sys, locale
 from jaettu import *
 
 aikaikk = 40
 tallenna = 0
 try:
-    luku = int(sys.argv[1])
-    if(luku < 2):
-        tallenna = luku
-    else:
-        aikaikk = luku
-except:
-    pass
-try:
-    luku = int(sys.argv[2])
-    if(luku < 2):
-        tallenna = luku
-    else:
-        aikaikk = luku
+    aikaikk  = int(sys.argv[1])
+    tallenna = int(sys.argv[2])
 except:
     pass
 
@@ -45,8 +34,8 @@ else:
 
 figure(figsize=(12,10))
 for aind in range(len(ajot)):
-    tiedos = np.loadtxt('%s/pintaalat_%s_maks.txt'\
-                      %(pa_kansio, ajot[aind]), usecols=[0,2])
+    tiedos = np.loadtxt('%s/makspintaalat_%s.txt'\
+                      %(kansio, ajot[aind]), usecols=[0,2])
     if(aikaikk < 0):
         aikaikk = len(tiedos)
     v0 = tiedos[0,1]
@@ -102,8 +91,8 @@ for aind in range(len(ajot)):
     ax2.plot(param[:,3], param[:,2], color=vari)
     ylabel('$r^2$', rotation=0, fontsize=15, color=vari)
     yticks(fontsize=13, color=vari)
-    if suomeksi:
-        paikallista_akselit(0,1)
+    locale.setlocale(locale.LC_ALL, paikallisuus)
+    paikallista_akselit(0,1)
     ylim([0.85, 1])
 
 suptitle(ulaotsikko)

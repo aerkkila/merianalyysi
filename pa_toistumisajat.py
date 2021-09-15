@@ -24,7 +24,7 @@ except:
     vuosi1 = 2100
     
 gumbtied = "pa_gumbkertoimet_%i_%i.txt" %(vuosi0, vuosi1);
-tiedos = np.genfromtxt(gumbtied, usecols=[1,2])
+tiedos = np.loadtxt(gumbtied, usecols=(1,2))
     
 a = tiedos[:,0]
 b = tiedos[:,1]
@@ -47,7 +47,7 @@ fig1 = figure(1,figsize=(10,8))
 for aind in range(len(ajot)):
     
     #kertymäfunktio haetaan tuloksista
-    tiedos = np.loadtxt('%s/pintaalat_%s_maks.txt' %(tiedokset,ajot[aind]), usecols=[0,2])
+    tiedos = np.loadtxt('%s/makspintaalat_%s.txt' %(kansio,ajot[aind]), usecols=(0,2))
     try:
         tiedos = rajaa(tiedos, vuosi0, vuosi1)
     except Exception as e:
@@ -68,11 +68,11 @@ for aind in range(len(ajot)):
     ylabel(ynimi, fontsize=11)
     sp2.plot(Tarr, A1, color=varit[aind], label=ajonimet[aind])
 
-suptitle('%i – %i' %(vuosi0, vuosi1))
+suptitle('%i–%i' %(vuosi0, vuosi1))
 tight_layout(h_pad=1)
 
 figure(2)
-title('%i – %i' %(vuosi0, vuosi1))
+title('%i–%i' %(vuosi0, vuosi1))
 xlabel(xnimi, fontsize=11)
 ylabel(ynimi)
 tight_layout()
@@ -80,8 +80,8 @@ legend()
 ylim(top=105000)
 if len(sys.argv) > 1 and sys.argv[1] == '1':
     figure(2)
-    savefig('%s/pa_toistumisajat.png' %(kuvat))
+    savefig('%s/pa_toistumisajat%i_%i.png' %(kuvat, vuosi0, vuosi1))
     figure(1)
-    savefig('%s/pa_toistumisajat_erikseen.png' %(kuvat))
+    savefig('%s/pa_toistumisajat_erikseen%i_%i.png' %(kuvat, vuosi0, vuosi1))
 else:
     show()

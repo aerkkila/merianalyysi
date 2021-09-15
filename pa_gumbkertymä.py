@@ -3,16 +3,15 @@
 from matplotlib.pyplot import *
 import numpy as np
 import scipy.stats as st
-import sys
-import locale
+import sys, locale
 import matplotlib.ticker as ticker
 from jaettu import *
 
 if(suomeksi):
-    locale.setlocale(locale.LC_ALL, "fi_FI.utf8")
     xnimi = 'pinta-ala $(km^2)$'
 else:
     xnimi = 'area $(km^2)$'
+    
 def kautto():
     print("Käyttö: python3 pa_gumbkertymä.py alkuvuosi loppuvuosi")
     exit()
@@ -20,19 +19,16 @@ def kautto():
 kuvakoko = (10,10)
 try:
     vuosi0 = int(sys.argv[1])
-except Exception as e:
-    print(str(e))
-    kautto()
-try:
     vuosi1 = int(sys.argv[2])
 except Exception as e:
     print(str(e))
     kautto()
+    
 ulos = open("pa_gumbkertoimet_%i_%i.txt" %(vuosi0,vuosi1), "w")
 
 figure(figsize=kuvakoko)
 for aind in range(len(ajot)):
-    tiedos = np.genfromtxt("%s/pintaalat_%s_maks.txt" %(pa_kansio,ajot[aind]), usecols=[0,2],dtype=int)
+    tiedos = np.genfromtxt("%s/makspintaalat_%s.txt" %(kansio,ajot[aind]), usecols=[0,2],dtype=int)
     try:
         tiedos = rajaa(tiedos, vuosi0, vuosi1)
     except Exception as e:
@@ -58,10 +54,8 @@ for aind in range(len(ajot)):
     plot(pa[0:raja], Fg[0:raja], 'o', color='deepskyblue') #huomioidut pisteet
     plot(pa[raja:], Fg[raja:], 'o', color='r') #ei-huomioidut pisteet
     plot(pa, a*pa+b, color='olive')
-    if suomeksi:
-        title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
-    else:
-        title('%s; $r^2$ = %.4f' %(ajonimet[aind], r**2))
+    locale.setlocale(locale.LC_ALL, paikallisuus)
+    title(locale.format_string("%s; $r^2$ = %.4f", (ajonimet[aind], r**2)));
     xlabel(xnimi, fontsize=11)
     ylabel("-ln(-ln(F(A)))", fontsize=12)
 
@@ -69,20 +63,15 @@ for aind in range(len(ajot)):
     plot(pa[0:raja], F[0:raja], 'o', color='deepskyblue') #huomioidut pisteet
     plot(pa[raja:], F[raja:], 'o', color='r') #ei-huomioidut pisteet
     plot(pa, np.exp(-np.exp(-a*pa-b)), color='olive')
-    if(suomeksi):
-        title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))))
-        xlabel('pinta-ala ($km^2$)', fontsize=11)
-        paikallista_akselit()
-    else:
-        title("%s; $σ_{res}$ = %.3f" %(ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b))))))
-        xlabel('area ($km^2$)', fontsize=11)
+    title(locale.format_string("%s; $σ_{res}$ = %.3f", (ajonimet[aind], np.std(F-(np.exp(-np.exp(-a*pa-b)))))))
     xlabel(xnimi, fontsize=11)
+    paikallista_akselit()
     ylabel("F",rotation=0, fontsize=12)
 
 ulos.close()
-suptitle("%i – %i" %(vuosi0, vuosi1))
+suptitle("%i–%i" %(vuosi0, vuosi1))
 tight_layout(h_pad=1)
 if len(sys.argv) > 3 and sys.argv[3] == '1':
-    savefig('%s/pa_gumbkertymä_%i_%i.png' %(kuvat, vuosi0, vuosi1))
+    savefig('%s/pa_gumbkertymä%i_%i.png' %(kuvat, vuosi0, vuosi1))
 else:
     show()
