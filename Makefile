@@ -17,4 +17,7 @@ pituus: pituus.c
 	gcc -Wall pituus.c -O3
 
 esiintyvyys: esiintyvyys.c
-	gcc -Wall -shared -o esiintyvyys.so esiintyvyys.c -lm -O3
+	gcc -shared -o esiintyvyys.so esiintyvyys.c -lm -O3
+
+esiintyvyys_saadettava: esiintyvyys_säädettävä.c
+	gcc -g -shared -o esiintyvyys_säädettävä.so esiintyvyys_säädettävä.c -lm -O3
