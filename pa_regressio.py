@@ -13,7 +13,8 @@ else:
     xnimi = 'year'
     ynimi = 'area ($km^2$)'
 
-figure(figsize=(12,10));
+fig=figure(figsize=(12,12))
+axs=fig.subplots(3,2).flatten()
 for aind,ajo in enumerate(ajot):
     data = np.genfromtxt("%s/makspintaalat_%s.txt" %(kansio, ajo))
     pa = data[:,0]
@@ -21,9 +22,10 @@ for aind,ajo in enumerate(ajot):
 
     a,b,r,p,kkv = st.linregress(vuodet, pa)
 
-    subplot(3,2,aind+1)
+    sca(axs[aind])
     plot(vuodet,pa,'o', color='deepskyblue')
     plot(vuodet, a*vuodet+b, color='r')
+    ylim((0,107000))
     locale.setlocale(locale.LC_ALL, paikallisuus)
     title(locale.format_string("%s, p = %.3f\n%.1fe3 $km^2/10a$, $\sigma_{res}$ = %.0f",
                                (ajonimet[aind], p, a/100, np.std(pa-(a*vuodet+b)))), fontsize=12)

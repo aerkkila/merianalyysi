@@ -78,6 +78,7 @@ for aind in range(len(ajot)):
     A = A.transpose()
 
     subplot(3,2,aind+1)
+    ylim(0,90000)
     plot(param[:,3], A, color='k')
     grid('on')
     xlabel(xnimi, fontsize=15)
