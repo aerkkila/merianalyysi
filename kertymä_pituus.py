@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-kautto = "Käyttö: ./tämä alkuvuosi loppuvuosi (1, jos tallenna kuva)"
+kautto = "Käyttö: ./tämä alkuvuosi loppuvuosi(otetaan mukaan) konsraja*100 (1, jos tallenna kuva)"
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,21 +12,26 @@ from jaettu import *
 if suomeksi:
     xnimi = 'Jäätalven pituus (päivää)'
     ynimi = 'Todennäköisyyskertymä'
+    konsrajasana = 'peittävyysraja'
 else:
     xnimi = 'Ice season length (days)'
     ynimi = 'Cumulative propability'
+    konsrajasana = 'concentration limit'
+    
 
 if len(sys.argv) < 3:
     print(kautto)
     exit()
-nimialku = 'pituus'
 try:
     vuosi0 = int(sys.argv[1])
     vuosi1 = int(sys.argv[2])
+    knsraj = int(sys.argv[3])
 except Exception as e:
     print(str(e))
     print(kautto)
     exit()
+    
+nimialku = 'pituus%i' %knsraj
 
 fig = plt.figure(figsize=(12,10))
 for pind,p in enumerate(paikat_fi):
@@ -50,8 +55,10 @@ for pind,p in enumerate(paikat_fi):
     plt.xlabel(xnimi, fontsize=15)
     plt.yticks(fontsize=13)
     plt.xticks(fontsize=13)
-    plt.legend(fontsize=11, frameon=0)
-fig.suptitle("%i–%i"%(vuosi0,vuosi1), fontsize=18)
+    plt.legend(fontsize=11, frameon=0, loc='upper left' if p=='Kemi' else 'lower right')
+fig.suptitle(locale.format_string
+             ("%i–%i; %s = %.2f", (vuosi0,vuosi1,konsrajasana,knsraj/100)),
+             fontsize=18)
 plt.tight_layout()
 
 if sys.argv[-1]=='1':

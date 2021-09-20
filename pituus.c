@@ -16,9 +16,13 @@ char* korvaa_strstr(char* a, const char* b, const char* c) {
   return a;
 }
 
-int main() {
+int main(int argc, char** argv) {
   const char* kansio = "/home/aerkkila/b/tiedokset";
-  const float konsraja = 0.15;
+  float konsraja;
+  if(argc < 2)
+    konsraja = 0.15;
+  else
+    sscanf(argv[1], "%f", &konsraja);
   char cnimi[500];
   int ind;
   
@@ -49,7 +53,9 @@ int main() {
     /*luetaan tiedosto*/
     for(ind=0; fscanf(fc, "%f%hi%hi", kons+ind, paiva+ind, vuosi+ind)==3; ind++);
 
-    if(!(korvaa_strstr(cnimi, "peittävyydet_", "pituus_"))) {
+    /*uuden nimen luominen*/
+    sprintf(cnimi+400, "pituus%i_", (int)(konsraja*100+0.000001));
+    if(!(korvaa_strstr(cnimi, "peittävyydet_", cnimi+400))) {
       fprintf(stderr, "Virhe, tunnistetta ei löytynyt nimestä\n");
       return 1;
     }
@@ -68,7 +74,7 @@ int main() {
     ind -= 244;
 
     while(ind>360) { //kun voidaan vielä lukea koko vuosi
-      short d0 = 0x7fff; //laitetaan positiivisin luku, jos ei ole jäätä
+      short d0 = (unsigned short)(-1)>>1; //laitetaan positiivisin luku, jos ei ole jäätä
       short dn = 0;
       for(int i=0; i<366; i++)
 	if(kons1[i] >= konsraja && !dn++)
