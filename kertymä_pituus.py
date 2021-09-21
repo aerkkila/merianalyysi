@@ -34,6 +34,9 @@ except Exception as e:
 nimialku = 'pituus%i' %knsraj
 
 fig = plt.figure(figsize=(12,10))
+ytikit = np.linspace(0,1,11)
+locale.setlocale(locale.LC_ALL, paikallisuus)
+ynimet = [locale.format_string("%.1f",luku) if not i%2 else '' for i,luku in enumerate(ytikit)]
 for pind,p in enumerate(paikat_fi):
     ax = plt.subplot(3,2,pind+1)
     
@@ -46,14 +49,18 @@ for pind,p in enumerate(paikat_fi):
         plt.plot(tiedos, F, color=varit[aind], label=ajonimet[aind])
 
     plt.grid('on')
+    plt.yticks(ticks=ytikit, labels=ynimet, fontsize=13)
+    viivat=ax.yaxis.get_gridlines()
+    for i,viiva in enumerate(viivat):
+        if not i%2:
+            viiva.set_color('k')
+        else:
+            viiva.set_linestyle(':')
     plt.title(paikat[pind], fontsize=15)
-    locale.setlocale(locale.LC_ALL, paikallisuus)
-    paikallista_akselit()
     plt.ylim(0,1)
     plt.xlim(0,180)
     plt.ylabel(ynimi, fontsize=15)
     plt.xlabel(xnimi, fontsize=15)
-    plt.yticks(fontsize=13)
     plt.xticks(fontsize=13)
     plt.legend(fontsize=11, frameon=0, loc='upper left' if p=='Kemi' else 'lower right')
 fig.suptitle(locale.format_string

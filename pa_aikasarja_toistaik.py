@@ -2,8 +2,6 @@
 
 #piirtää n vuoden toistumisaikaa vastaavan pinta-alan vuosiluvun funktiona
 #käytetään liukuvaa aikasarjaa
-#gumbelsuoran termit luetaan tiedostoista,
-#jotka tehdään ohjelmalla laske_gumbkertoimet.py
 
 import numpy as np
 import scipy.stats as st
@@ -11,7 +9,7 @@ from matplotlib.pyplot import *
 import sys, locale
 from jaettu import *
 
-aikaikk = 40
+aikaikk = 45
 tallenna = 0
 try:
     aikaikk  = int(sys.argv[1])
@@ -33,6 +31,8 @@ else:
     ulaotsikko = 'time window = %i years' %aikaikk
 
 figure(figsize=(12,10))
+ytikit = np.linspace(0,80000,9)
+ynimet = ["%.i" %luku if not i%2 else '' for i,luku in enumerate(ytikit)]
 for aind in range(len(ajot)):
     tiedos = np.loadtxt('%s/makspintaalat_%s.txt'\
                       %(kansio, ajot[aind]), usecols=[0,2])
@@ -81,20 +81,28 @@ for aind in range(len(ajot)):
     ylim(0,90000)
     plot(param[:,3], A, color='k')
     grid('on')
+    yticks(ticks=ytikit, labels=ynimet, fontsize=13)
+    viivat=gca().yaxis.get_gridlines()
+    for i,viiva in enumerate(viivat):
+        if not i%2:
+            viiva.set_color('k')
+        else:
+            viiva.set_linestyle(':')
     xlabel(xnimi, fontsize=15)
     ylabel(ynimi, fontsize=15)
-    yticks(fontsize=13)
     xticks(fontsize=13)
     title('%s' %(ajonimet[aind]))
 
-    ax2 = gca().twinx()
-    vari = 'lightskyblue'
-    ax2.plot(param[:,3], param[:,2], color=vari)
-    ylabel('$r^2$', rotation=0, fontsize=15, color=vari)
-    yticks(fontsize=13, color=vari)
-    locale.setlocale(locale.LC_ALL, paikallisuus)
-    paikallista_akselit(0,1)
-    ylim([0.85, 1])
+#r^2 oikealle y-akselille
+    if 0:
+        ax2 = gca().twinx()
+        vari = 'lightskyblue'
+        ax2.plot(param[:,3], param[:,2], color=vari)
+        ylabel('$r^2$', rotation=0, fontsize=15, color=vari)
+        yticks(fontsize=13, color=vari)
+        locale.setlocale(locale.LC_ALL, paikallisuus)
+        paikallista_akselit(0,1)
+        ylim([0.85, 1])
 
 suptitle(ulaotsikko)
 tight_layout(h_pad=1)
