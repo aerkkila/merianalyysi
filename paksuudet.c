@@ -77,9 +77,9 @@ int main(int argc, char** argv) {
       }
     }
     fprintf(f, ("%s:\t Haettiin %.4f°N\t %.4f°E\t Saatiin:\t %.4f°N\t %.4f°E\t\n" \
-		"matka = %.0lf m\n"),					\
+		"matka = %.0lf m\t indeksi = %i\n"),			\
 	    paikat[p], paikatlat[p], paikatlon[p], lat[pienin_ind], lon[pienin_ind], \
-	    asin(sqrt(pienin_matka))/2*sade);
+	    asin(sqrt(pienin_matka))/2*sade, pienin_ind);
     sijainnit[p] = pienin_ind;
   }
   /*taulukko koordinaateista suomeksi ja englanniksi*/
@@ -128,15 +128,16 @@ int main(int argc, char** argv) {
 	  PAKS(p, v-alkuvuosi, paiva) = paksluenta[paiva*xy+sijainnit[p]];
     }
     int i=0;
+    const char *restrict muoto = "%5.1f\t%3i\t%4i\n";
     for(int p=0; p<PAIKKOJA; p++) {
       sprintf(apuc, "paksuudet_%s_%s.txt", paikat[p], argv[aind]);
       FILE *f = fopen(apuc, "w");
       for(int vuosi=alkuvuosi; vuosi<loppuvuosi; vuosi++) {
 	for(int paiva=1; paiva<=366; paiva++, i++)
-	  fprintf(f, "%3.0f\t%3i\t%4i\n", paks[i]*100, paiva, vuosi);
+	  fprintf(f, muoto, paks[i]*100, paiva, vuosi); //muutettaessa muutettakoon myös tuleva fseek
 	if(vuosi % 4) {
 	  fseek(f, -15, SEEK_CUR);
-	  fprintf(f, "%3.0f\t%3i\t%4i\n", NAN, 366, vuosi);
+	  fprintf(f, muoto, NAN, 366, vuosi);
 	}
       }
       fclose(f);
