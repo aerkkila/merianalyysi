@@ -4,31 +4,41 @@
 #käytetään liukuvaa aikasarjaa
 
 import numpy as np
-import scipy.stats as st
+from numpy import log, exp
+from scipy.stats import linregress
 from matplotlib.pyplot import *
 import sys, locale
 from jaettu import *
 
-aikaikk = 45
-tallenna = 0
 try:
     aikaikk  = int(sys.argv[1])
-    tallenna = int(sys.argv[2])
+    laji = sys.argv[2]
 except:
-    pass
+    print("Käyttö: ./tämä aikaikkuna laji(g/w) (1, jos tallenna)")
+    exit()
 
-Tn = [2, 5, 10, 30, 50] #halutut toistumisajat
+Tn = (2, 5, 10, 30, 50) #halutut toistumisajat
 #pinta-alan yhtälö toistumisajan funktiona sovitussuoran parametreista
-pa_l = lambda T,a,b: (-np.log(-np.log(1/T))-b) / a
+    
+if laji == 'g': #gumbel
+    Fm = lambda F: -log(-log(F))
+    xm = lambda x: x
+    pa_T = lambda T,a,b: (Fm(1/T)-b) / a
+elif laji == 'w': #weibull
+    Fm = lambda F: log(-log(1-F))
+    xm = lambda x: log(x)
+    pa_T = lambda T,a,b: exp((Fm(1/T)-b) / a)
+else:
+    kautto()
 
 if suomeksi:
     xnimi = 'vuosi'
     ynimi = 'pinta-ala $(km^2)$'
-    ulaotsikko = 'aikaikkuna = %i vuotta' %aikaikk
+    ulaotsikko = 'aikaikkuna = %i vuotta; jakauma = %s' %(aikaikk, 'Gumbel' if laji=='g' else 'Weibull')
 else:
     xnimi = 'year'
     ynimi = 'area $(km^2)$'
-    ulaotsikko = 'time window = %i years' %aikaikk
+    ulaotsikko = 'time window = %i years; distribution = %s' %(aikaikk, 'Gumbel' if laji=='g' else 'Weibull')
 
 figure(figsize=(12,10))
 ytikit = np.linspace(0,80000,9)
@@ -56,15 +66,13 @@ for aind in range(len(ajot)):
                 raja = tmp
                 break
 
-        F = -1*np.log(-1*np.log(F)) #muunnos gumbelkoordinaatistoon
-
         #suoran sovitus sekä suoran parametrien ja vuoden tallentaminen
-        a, b, r, p, kkv = st.linregress(pa[0:raja], F[0:raja])
+        a, b, r, p, kkv = linregress(xm(pa[0:raja]), Fm(F[0:raja]))
         vuosi = v0+ind+(aikaikk-1)//2
         param[ind,:] = [a,b,r**2,vuosi]
 
         ind += 1
-        if (ind+aikaikk > len(tiedos)):
+        if ind+aikaikk > len(tiedos):
             break
     
     #pinta-alat kaikista toistumisajoista
@@ -72,7 +80,7 @@ for aind in range(len(ajot)):
     A = [[]]*len(Tn)
     tmp = 0
     for T in Tn:
-        A[tmp] = pa_l(T,param[:,0],param[:,1])
+        A[tmp] = pa_T(T,param[:,0],param[:,1])
         tmp+=1
     A = np.array(A)
     A = A.transpose()
@@ -106,7 +114,7 @@ for aind in range(len(ajot)):
 
 suptitle(ulaotsikko)
 tight_layout(h_pad=1)
-if tallenna:
-    savefig("%s/pa_aikasarja_toistaik_%i.png" %(kuvat, aikaikk))
+if sys.argv[-1] == '1':
+    savefig("%s/pa_%s_aikasarja_toistaik_%i.png" %(kuvat, laji, aikaikk))
 else:
     show()
