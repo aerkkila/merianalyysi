@@ -2,6 +2,8 @@
 
 #piirtää n vuoden toistumisaikaa vastaavan pinta-alan vuosiluvun funktiona
 #käytetään liukuvaa aikasarjaa
+#jokaiselle ajolle valitaan joko gumbel- tai weibull-jakauma
+#voi valita yhden kaikille (esim. g) tai kaikille erikseen (esim. gwggwg)
 
 import numpy as np
 from numpy import log, exp
@@ -12,82 +14,78 @@ from jaettu import *
 
 try:
     aikaikk  = int(sys.argv[1])
-    laji = sys.argv[2]
+    lajit = sys.argv[2]
 except:
-    print("Käyttö: ./tämä aikaikkuna laji(g/w) (1, jos tallenna)")
+    print("Käyttö: ./tämä aikaikkuna lajit(g/w) (1, jos tallenna)")
     exit()
 
 Tn = (2, 5, 10, 30, 50) #halutut toistumisajat
-#pinta-alan yhtälö toistumisajan funktiona sovitussuoran parametreista
-    
-if laji == 'g': #gumbel
-    Fm = lambda F: -log(-log(F))
-    xm = lambda x: x
-    pa_T = lambda T,a,b: (Fm(1/T)-b) / a
-elif laji == 'w': #weibull
-    Fm = lambda F: log(-log(1-F))
-    xm = lambda x: log(x)
-    pa_T = lambda T,a,b: exp((Fm(1/T)-b) / a)
-else:
-    kautto()
+#gumbel
+Fg = lambda F: -log(-log(F)) #koordinaattimuunnos
+xg = lambda x: x #koordinaattimuunnos
+x_Fg = lambda F,a,b: (Fg(F)-b) / a #palauttaan uuden x:n kun suora on sovitettu
+#weibull
+Fw = lambda F: log(-log(1-F))
+xw = lambda x: log(x)
+x_Fw = lambda F,a,b: exp((Fw(F)-b) / a)
+
+class Jakaumat:
+    def __init__(self,lajit,ajat):
+        self.todnak = 1/np.array(ajat)
+        self.lajit=lajit
+        while len(self.lajit) < len(ajot):
+            self.lajit += self.lajit[-1]
+    def __enter__(self):
+        return self
+    def sovita(self,x,F,aind):
+        if self.lajit[aind] == 'g': #gumbel
+            a, b, r, p, kkv = linregress(xg(x), Fg(F))
+            return np.append(x_Fg(self.todnak,a,b), r**2)
+        if self.lajit[aind] == 'w': #weibull
+            a, b, r, p, kkv = linregress(xw(x), Fw(F))
+            return np.append(x_Fw(self.todnak,a,b), r**2)
+        else:
+            print("laji oli %s" %(self.lajit[aind]))
+            kautto()
+    def __exit__(self,type,value,traceback):
+        pass
 
 if suomeksi:
     xnimi = 'vuosi'
     ynimi = 'pinta-ala $(km^2)$'
-    ulaotsikko = 'aikaikkuna = %i vuotta; jakauma = %s' %(aikaikk, 'Gumbel' if laji=='g' else 'Weibull')
+    ulaotsikko = 'aikaikkuna = %i vuotta' %aikaikk
 else:
     xnimi = 'year'
     ynimi = 'area $(km^2)$'
-    ulaotsikko = 'time window = %i years; distribution = %s' %(aikaikk, 'Gumbel' if laji=='g' else 'Weibull')
+    ulaotsikko = 'time window = %i years' %aikaikk
 
-figure(figsize=(12,10))
+fig = figure(figsize=(12,10))
+axs = fig.subplots(3,2).flatten()
 ytikit = np.linspace(0,80000,9)
 ynimet = ["%.i" %luku if not i%2 else '' for i,luku in enumerate(ytikit)]
+F = np.array(np.arange(1,aikaikk+1) / (aikaikk+1))
+jakaumat = Jakaumat(lajit,Tn)
 for aind in range(len(ajot)):
     tiedos = np.loadtxt('%s/makspintaalat_%s.txt'\
                       %(kansio, ajot[aind]), usecols=[0,2])
-    if(aikaikk < 0):
-        aikaikk = len(tiedos)
     v0 = tiedos[0,1]
-    param = np.zeros((len(tiedos)-aikaikk+1,4))
-    
-    #muodostetaan juokseva aikasarja, jossa on kerrallaan mukana n vuotta
+    pituus = len(tiedos)-aikaikk+1
+    alat = np.zeros((pituus,len(jakaumat.todnak)+1))
     #kun v on aikaikkunan 1. vuosi, keskiarvon vuodeksi laitetaan v+n/2
     #kun n on parillinen, takaa jää yksi vuosi vähemmän pois kuin edestä
-    ind = 0
-    while 1:
+    for ind in range(pituus):
         pa = np.sort(tiedos[ind : ind+aikaikk, 0]) #valitaan aikaikkuna
-        F = np.array(range(1,len(pa)+1)) / (len(pa)+1.0) #kokeellinen kertymäfunktio
-
-        #rajataan ei-huomioitaviksi suoran sovituksessa kokonaisjäätymiset
-        raja = len(pa)
+        raja = len(pa) #rajataan kokonaisjäätymiset pois sovituksesta
         for tmp in range(len(pa)-1):
             if(pa[tmp] > 103000):
                 raja = tmp
                 break
+        alat[ind,:] = jakaumat.sovita(pa[:raja],F[:raja],aind)
 
-        #suoran sovitus sekä suoran parametrien ja vuoden tallentaminen
-        a, b, r, p, kkv = linregress(xm(pa[0:raja]), Fm(F[0:raja]))
-        vuosi = v0+ind+(aikaikk-1)//2
-        param[ind,:] = [a,b,r**2,vuosi]
-
-        ind += 1
-        if ind+aikaikk > len(tiedos):
-            break
-    
-    #pinta-alat kaikista toistumisajoista
-    #a ja b ovat taulukoita, joten tässä ovat kaikki vuodet
-    A = [[]]*len(Tn)
-    tmp = 0
-    for T in Tn:
-        A[tmp] = pa_T(T,param[:,0],param[:,1])
-        tmp+=1
-    A = np.array(A)
-    A = A.transpose()
-
-    subplot(3,2,aind+1)
+    sca(axs[aind])
     ylim(0,90000)
-    plot(param[:,3], A, color='k')
+    vuodet = np.arange(v0,v0+pituus) + (aikaikk-1)//2
+    plot(vuodet, alat[:,:-1], color='k')
     grid('on')
     yticks(ticks=ytikit, labels=ynimet, fontsize=13)
     viivat=gca().yaxis.get_gridlines()
@@ -99,13 +97,13 @@ for aind in range(len(ajot)):
     xlabel(xnimi, fontsize=15)
     ylabel(ynimi, fontsize=15)
     xticks(fontsize=13)
-    title('%s' %(ajonimet[aind]))
+    title('%s (%s)' %(ajonimet[aind], jakaumat.lajit[aind]))
 
 #r^2 oikealle y-akselille
     if 0:
         ax2 = gca().twinx()
         vari = 'lightskyblue'
-        ax2.plot(param[:,3], param[:,2], color=vari)
+        ax2.plot(vuodet, alat[:,-1], color=vari)
         ylabel('$r^2$', rotation=0, fontsize=15, color=vari)
         yticks(fontsize=13, color=vari)
         locale.setlocale(locale.LC_ALL, paikallisuus)
@@ -115,6 +113,6 @@ for aind in range(len(ajot)):
 suptitle(ulaotsikko)
 tight_layout(h_pad=1)
 if sys.argv[-1] == '1':
-    savefig("%s/pa_%s_aikasarja_toistaik_%i.png" %(kuvat, laji, aikaikk))
+    savefig("%s/pa%s_aikasarja_toistaik.png" %(kuvat, aikaikk))
 else:
     show()
