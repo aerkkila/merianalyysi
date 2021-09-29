@@ -19,7 +19,7 @@ except:
     print("Käyttö: ./tämä aikaikkuna lajit(g/w) (1, jos tallenna)")
     exit()
 
-Tn = (2, 5, 10, 30, 50) #halutut toistumisajat
+Tn = (1.11111, 2, 5, 10, 30, 50) #halutut toistumisajat
 #gumbel
 Fg = lambda F: -log(-log(F)) #koordinaattimuunnos
 xg = lambda x: x #koordinaattimuunnos
@@ -61,7 +61,7 @@ else:
 
 fig = figure(figsize=(12,10))
 axs = fig.subplots(3,2).flatten()
-ytikit = np.linspace(0,80000,9)
+ytikit = np.linspace(0,100000,11)
 ynimet = ["%.i" %luku if not i%2 else '' for i,luku in enumerate(ytikit)]
 F = np.array(np.arange(1,aikaikk+1) / (aikaikk+1))
 jakaumat = Jakaumat(lajit,Tn)
@@ -83,9 +83,10 @@ for aind in range(len(ajot)):
         alat[ind,:] = jakaumat.sovita(pa[:raja],F[:raja],aind)
 
     sca(axs[aind])
-    ylim(0,90000)
+    ylim(0,100000)
     vuodet = np.arange(v0,v0+pituus) + (aikaikk-1)//2
-    plot(vuodet, alat[:,:-1], color='k')
+    plot(vuodet, alat[:,0:1], color='r')
+    plot(vuodet, alat[:,1:-1], color='k')
     grid('on')
     yticks(ticks=ytikit, labels=ynimet, fontsize=13)
     viivat=gca().yaxis.get_gridlines()
@@ -110,7 +111,7 @@ for aind in range(len(ajot)):
         paikallista_akselit(0,1)
         ylim([0.85, 1])
 
-suptitle(ulaotsikko)
+#suptitle(ulaotsikko)
 tight_layout(h_pad=1)
 if sys.argv[-1] == '1':
     savefig("%s/pa%s_aikasarja_toistaik.png" %(kuvat, aikaikk))
