@@ -114,8 +114,8 @@ with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
             if i%4==0:
                 g.set_linewidth(1.5)
                 g.set_color('k')
-    suptitle(locale.format_string("%i–%i; $3\sigma=$%i\n%s ≥ %4.2f",
-                                  (lukija.vuosi0,lukija.vuosi1,gausspit,konsstr,konsraja)))
+    suptitle(locale.format_string("%i–%i; %s ≥ %4.2f",
+                                  (lukija.vuosi0,lukija.vuosi1,konsstr,konsraja)))
     tight_layout()
     if(sys.argv[-1] == '1'):
         savefig("%s/esiintyvyys%2i_%i_%i.png" %(kuvat,int(konsraja*100),vuosi0,vuosi1))

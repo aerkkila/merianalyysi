@@ -57,14 +57,13 @@ float* esiintyvyys(float konsraja, int gausspit, int tiedosind) {
   setlocale(LC_ALL, "en_US.utf8");
   int kohta = tiedosind*yksipituus;
   int pituus;
-  int apui;
-  apui = (vuosi0-*vuodet)*366; //ohitettavia päiviä
-  pituus = (vuosi1-vuosi0+1)*366;
+  int apui = (vuosi0-1-*vuodet)*366; //ohitettavia päiviä
+  pituus = (vuosi1-vuosi0+2)*366;
   
   for(int i=0; i<365; i++)
     todnak[i] = 0;
   int paivaind = 0;
-  int i = apui+paiva0-gausspit+365+!(vuosi0%4);
+  int i = apui+paiva0-gausspit+365+!((vuosi0-1)%4);
   int paate = pituus-366+i;
   for(; i<paate; i++) {
     paivaind %= 365;
@@ -78,7 +77,7 @@ float* esiintyvyys(float konsraja, int gausspit, int tiedosind) {
     todnak[paivaind] += luenta[i+kohta] >= konsraja;
     paivaind++;
   }
-  const float kerroin = 366.0/(pituus-366);
+  const float kerroin = 1.0/(vuosi1-vuosi0+1);
   for(int i=0; i<365; i++)
     todnak[i] *= kerroin;
   return suodate(gausspit);

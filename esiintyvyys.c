@@ -17,8 +17,8 @@ static float* suodate(int);
 void alusta(int p0, int v0, int v1) {
   paiva0 = p0;
   vuosi0 = v0; vuosi1 = v1;
-  luenta = malloc(366*(v1-v0+1)*sizeof(float));
-  vuodet = malloc(366*(v1-v0+1)*2);
+  luenta = malloc(366*(v1-v0+2)*sizeof(float));
+  vuodet = malloc(366*(v1-v0+2)*2);
   todnak = malloc(365*sizeof(float)); //hypätään karkauspäivien yli
   tulos = malloc(365*sizeof(float));
 }
@@ -33,7 +33,6 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
     joten tämä pitää määrittää joka kerralla erikseen*/
   setlocale(LC_ALL, "en_US.utf8");
   int pituus;
-  int apui;
   FILE *f = fopen(tiednimi, "r");
   if(!f) {
     printf("Ei avattu tiedostoa: \"%s\"\n", tiednimi);
@@ -46,9 +45,9 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
   do
     rivi++;
   while(fgetc(f) != '\n');
-  apui = (vuosi0-*vuodet)*366; //ohitettavia päiviä
-  fseek(f,apui*rivi,SEEK_SET);
-  pituus = (vuosi1-vuosi0+1)*366;
+  int apui = (vuosi0-1-*vuodet)*366; //ohitettavia päiviä
+  fseek(f,apui*rivi,SEEK_SET); //lukeminen alkaa ennen vuosi0:n alkua
+  pituus = (vuosi1-vuosi0+2)*366; //+2: esim 2007̇–2007 vaatii myös 2006:n lukemisen
   for(int i=0; i<pituus; i++)
     fscanf(f, "%f%*i%hi", luenta+i, vuodet+i);
   fclose(f);
@@ -56,9 +55,9 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
   for(int i=0; i<365; i++)
     todnak[i] = 0;
   int paivaind = 0;
-  int i = paiva0-gausspit+365+!(vuosi0%4);
-  int paate = pituus-366+i;
-  for(int i=paiva0-gausspit+365+!(vuosi0%4); i<paate; i++) {
+  int i = paiva0-gausspit+365+!((vuosi0-1)%4);
+  int paate = pituus+i-366;
+  for(; i<paate; i++) {
     paivaind %= 365;
     if(paivaind+paiva0-gausspit == 59 && vuodet[i]%4 == 0)
       i++; //karkauspäivän ohitus
@@ -70,7 +69,7 @@ float* esiintyvyys(const char* tiednimi, float konsraja, int gausspit) {
     todnak[paivaind] += luenta[i] >= konsraja;
     paivaind++;
   }
-  const float kerroin = 366.0/(pituus-366);
+  const float kerroin = 1.0/(vuosi1-vuosi0+1);
   for(int i=0; i<365; i++)
     todnak[i] *= kerroin;
   return suodate(gausspit);
