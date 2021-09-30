@@ -86,6 +86,10 @@ locale.setlocale(locale.LC_ALL, paikallisuus)
 xnimet = ajat.strftime("%e. %b")
 fig.canvas.mpl_connect('key_press_event', painettaessa)
 
+ytikit = np.linspace(0,1,11)
+locale.setlocale(locale.LC_ALL, paikallisuus)
+ynimet = [locale.format_string("%.1f",luku) if not i%2 else '' for i,luku in enumerate(ytikit)]
+
 with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
     nimet = []
     viivat = []
@@ -102,20 +106,29 @@ with Lukija(paiva0, vuosi0, vuosi1, gausspit) as lukija:
         locale.setlocale(locale.LC_ALL, paikallisuus)
         paikallista_akselit(0,1)
         xticks(xtikit, xnimet, rotation=45, fontsize=11)
-        yticks(fontsize=12)
+        yticks(ytikit, ynimet, fontsize=12)
         if(paikka != 'Kemi'):
             legend(loc='upper right',frameon=False, fontsize=10)
         else:
             legend(loc='lower center',frameon=False, fontsize=10)
         title(paikka)
         #50 päivän välein korostettu viiva
-        gridx = axs[pind].xaxis.get_gridlines()
-        for i,g in enumerate(gridx):
+        viivat = axs[pind].xaxis.get_gridlines()
+        for i,g in enumerate(viivat):
             if i%4==0:
                 g.set_linewidth(1.5)
                 g.set_color('k')
-    suptitle(locale.format_string("%i–%i; %s ≥ %4.2f",
-                                  (lukija.vuosi0,lukija.vuosi1,konsstr,konsraja)))
+                
+        viivat=axs[pind].yaxis.get_gridlines()
+        for i,viiva in enumerate(viivat):
+            if not i%2:
+                pass
+            elif any((1,5,9)[j] == i for j in range(3)):
+                viiva.set_linestyle(':')
+            else:
+                viiva.set_linestyle('none')
+            suptitle(locale.format_string("%i–%i; %s ≥ %4.2f",
+                                          (lukija.vuosi0,lukija.vuosi1,konsstr,konsraja)))
     tight_layout()
     if(sys.argv[-1] == '1'):
         savefig("%s/esiintyvyys%2i_%i_%i.png" %(kuvat,int(konsraja*100),vuosi0,vuosi1))
