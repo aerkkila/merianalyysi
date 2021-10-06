@@ -8,13 +8,16 @@ typedef struct {
   int paikka;
 } maks_t;
 
-maks_t hae_maksimi(float* h, float* c, int pit, float konsraja) {
+#ifndef KONSRAJA
+#define KONSRAJA -1
+#endif
+
+maks_t hae_maksimi(float* h, float* c, int pit) {
   maks_t r = (maks_t){h[0], 0};
   
-  for(int i=1; i<pit; i++) {      
-    if (h[i] > r.arvo && c[i] > konsraja)
+  for(int i=1; i<pit; i++)
+    if (h[i] > r.arvo && c[i] > KONSRAJA)
       r = (maks_t){h[i], i};
-  }
   return r;
 }
 
@@ -33,7 +36,6 @@ char* korvaa_strstr(char* a, char* b, char* c) {
 
 int main() {
   const char* kansio = "/home/aerkkila/b/tiedokset";
-  const float konsraja = 0.9;
   DIR *d = opendir(kansio);
   if(!d) {
     fprintf(stderr, "Kansiota \"%s\" ei voitu avata\n", kansio);
@@ -93,7 +95,7 @@ int main() {
     float* paks1 = paks;
     float* kons1 = kons;
     
-    maks_t m = hae_maksimi(paks, kons, 244, konsraja);
+    maks_t m = hae_maksimi(paks, kons, 244);
     fprintf(fh, "%5.1f\t%hi\t%hi\n", m.arvo, paiva1[m.paikka], vuosi1[m.paikka]);
 
     paks1 += 244;
@@ -103,7 +105,7 @@ int main() {
     ind -= 244;
 
     while(ind>360) { //kun voidaan vielä lukea koko vuosi
-      m = hae_maksimi(paks1, kons1, 366, konsraja);
+      m = hae_maksimi(paks1, kons1, 366);
       short tmppaiva = ((paiva1[m.paikka]+122) % 366) - 122;
       short tmpvuosi = vuosi1[m.paikka];
       if(tmppaiva < 0)
