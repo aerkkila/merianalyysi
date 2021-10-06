@@ -71,7 +71,7 @@ except Exception as e:
 paiva0 = -61
 paiva1 = 166
 xakseli = np.arange(paiva0, paiva1)
-gausspit = 15
+gausspit = 12
 
 if suomeksi:
     konsstr = 'peittävyys'
