@@ -8,6 +8,8 @@ import sys, locale, pylab
 import matplotlib.ticker as ticker
 from jaettu import *
 
+sovitus = 'pns'
+
 def kautto():
     print("Käyttö: ./tämä alkuvuosi loppuvuosi laji(g/f/w) (1, jos tallenna)")
     exit()
@@ -72,12 +74,22 @@ for pind,paikka in enumerate(paikat):
         valitse_yhtalot(lajit[laji_ind])
         F1 = Fm(F)
         x1 = xm(suure)
-        if 1:
-            a,b,r,p,kkv = st.linregress(F1[raja:], x1[raja:]) #sovitetaan väärin päin, jotta neliösumma minimoidaan x-suunnassa
-            b = -b/a
-            a = 1/a
+        if sovitus == 'pns':
+            if 1:
+                a,b,r,p,kkv = st.linregress(F1[raja:], x1[raja:]) #sovitetaan väärin päin, jotta neliösumma minimoidaan x-suunnassa
+                b = -b/a
+                a = 1/a
+            else:
+                a,b,r,p,kkv = st.linregress(x1[raja:], F1[raja:])
+            print(a,b)
+        elif sovitus == 'ts':
+            ts = st.mstats.theilslopes(F1[raja:], x1[raja:])
+            a = ts[0]
+            b = ts[1]
+            r = 0
         else:
-            a,b,r,p,kkv = st.linregress(x1[raja:], F1[raja:])
+            printf("Tuntematon sovitusmenetelmä: %s" %sovitus)
+            exit()
 
         sca(axs[aind*2])
         plot(x1[raja:], F1[raja:], '.', color='deepskyblue')
