@@ -11,13 +11,36 @@ typedef struct {
 #ifndef KONSRAJA
 #define KONSRAJA -1
 #endif
+/*Paksuuksia ei enää lasketa samana talvena, jos tietyn päivän (PAIVARAJA)
+  jälkeen on riittävästi päiviä peräkkäin (N_PAIVIA),
+  jolloin paksuus on enintään OHUUSRAJA*/
+#ifndef PAIVARAJA
+#define PAIVARAJA 400
+#endif
+#ifndef N_PAIVIA
+#define N_PAIVIA 400
+#endif
+#ifndef OHUUSRAJA
+#define OHUUSRAJA -1
+#endif
 
-maks_t hae_maksimi(float* h, float* c, int pit) {
+maks_t hae_maksimi(float* h, float* c, short* d, int pit) {
   maks_t r = (maks_t){h[0], 0};
+  int n_paivia = 0;
   
-  for(int i=1; i<pit; i++)
-    if (h[i] > r.arvo && c[i] > KONSRAJA)
+  for(int i=1; i<pit; i++) {
+    if (h[i] > r.arvo && c[i] > KONSRAJA) {
       r = (maks_t){h[i], i};
+      continue;
+    }
+    if (d[i] > PAIVARAJA && d[i] < 240) {
+      if (h[i] <= OHUUSRAJA) {
+	if (++n_paivia >= N_PAIVIA)
+	  return r;
+      } else
+	n_paivia = 0;
+    }
+  }
   return r;
 }
 
@@ -95,7 +118,7 @@ int main() {
     float* paks1 = paks;
     float* kons1 = kons;
     
-    maks_t m = hae_maksimi(paks, kons, 244);
+    maks_t m = hae_maksimi(paks, kons, paiva, 244);
     fprintf(fh, "%5.1f\t%hi\t%hi\n", m.arvo, paiva1[m.paikka], vuosi1[m.paikka]);
 
     paks1 += 244;
@@ -105,7 +128,7 @@ int main() {
     ind -= 244;
 
     while(ind>360) { //kun voidaan vielä lukea koko vuosi
-      m = hae_maksimi(paks1, kons1, 366);
+      m = hae_maksimi(paks1, kons1, paiva1, 366);
       short tmppaiva = ((paiva1[m.paikka]+122) % 366) - 122;
       short tmpvuosi = vuosi1[m.paikka];
       if(tmppaiva < 0)
@@ -121,6 +144,13 @@ int main() {
     fclose(fh);
     fclose(fc);
   }
+  FILE* f = fopen("maksh_parametrit.txt", "w");
+  fprintf(f, ("n_päiviä = %i\n"
+	      "päiväraja = %i\n"
+	      "ohuusraja = %.4f cm\n"
+	      "peittävyysraja = %.4f\n"),
+	  N_PAIVIA, PAIVARAJA, (float)OHUUSRAJA, (float)KONSRAJA);
+  fclose(f);
   free(cnimi);
   free(hnimi);
   free(vuosi);
