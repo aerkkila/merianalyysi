@@ -23,6 +23,15 @@ const double sade = 6360963.529; //maan säde 63:nnella leveyspiirillä
 #define NCFUNK(funk, ...) {if((ncpalaute = funk(__VA_ARGS__)))	\
       printf("Virhe: %s\n", nc_strerror(ncpalaute));}
 
+#define MJONO(a) _MJONO1(a)
+#define _MJONO1(a) #a
+#ifndef MUUTTUJA
+#define MUUTTUJA icevolume
+#endif
+#ifndef ULOSNIMIALKU
+#define ULOSNIMIALKU tilavuudet
+#endif
+
 int main(int argc, char** argv) {
   int ncid, ncpalaute, id, alkuvuosi, loppuvuosi, vuosia=-1;
   /*onko annettu jokin toinen vuosien määrä*/
@@ -120,7 +129,7 @@ int main(int argc, char** argv) {
       printf("\rVuosi %i / %i; ajo %i / %i ", v-alkuvuosi+1, loppuvuosi-alkuvuosi, aind, argc-1);
       fflush(stdout);
       NCFUNK(nc_open, apuc, NC_NOWRITE, &ncid);
-      NCFUNK(nc_inq_varid, ncid, "icevolume", &id);
+      NCFUNK(nc_inq_varid, ncid, MJONO(MUUTTUJA), &id);
       NCFUNK(nc_get_var, ncid, id, paksluenta);
       NCFUNK(nc_close, ncid);
       for(int p=0; p<PAIKKOJA; p++)
@@ -130,7 +139,7 @@ int main(int argc, char** argv) {
     int i=0;
     const char *restrict muoto = "%5.1f\t%3i\t%4i\n";
     for(int p=0; p<PAIKKOJA; p++) {
-      sprintf(apuc, "paksuudet_%s_%s.txt", paikat[p], argv[aind]);
+      sprintf(apuc, "%s_%s_%s.txt", MJONO(ULOSNIMIALKU), paikat[p], argv[aind]);
       FILE *f = fopen(apuc, "w");
       for(int vuosi=alkuvuosi; vuosi<loppuvuosi; vuosi++) {
 	for(int paiva=1; paiva<=366; paiva++, i++)
