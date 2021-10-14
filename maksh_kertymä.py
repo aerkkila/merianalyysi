@@ -15,21 +15,6 @@ else:
     xnimi = 'Maximum thickness (cm)'
     ynimi = 'Cumulative propability'
 
-def valitse_yhtalot(laji):
-    global Fm, xm, Fpalaute
-    if laji == 'g': #gumbel
-        Fm = lambda F: -log(-log(F))
-        xm = lambda x: x
-        Fpalaute = lambda x: exp(-exp(-a*x-b))
-    elif laji == 'f': #fréchet
-        Fm = lambda F: log(-log(F))
-        xm = lambda x: log(x+1e-7)
-        Fpalaute = lambda x: exp(-x**a*exp(b))
-    elif laji == 'w': #weibull
-        Fm = lambda F: log(-log(1-F))
-        xm = lambda x: log(x+1e-7)
-        Fpalaute = lambda x: 1-exp(-x**a*exp(b))
-
 pars = argparse.ArgumentParser()
 pars.add_argument('-v0', '--vuosi0', type=int, default=2052,
                   help='Ensimmäinen mukaan otettava vuosi')
@@ -50,6 +35,10 @@ def valitse_yhtalot(laji):
         Fm = lambda F: -log(-log(F))
         xm = lambda x: x
         Fpalaute = lambda x: exp(-exp(-a*x-b))
+    elif laji == 'γ': #gumbel**2
+        Fm = lambda F: -log(-log(F))
+        xm = lambda x: x**2
+        Fpalaute = lambda x: exp(-exp(-a*x**2-b))
     elif laji == 'f': #fréchet
         Fm = lambda F: log(-log(F))
         xm = lambda x: log(x+1e-7)
@@ -76,10 +65,10 @@ if len(ar.lajit) > 3 and ar.lajit[-4:] == '.txt':
         tied = f.read()
     ar.lajit = ''
     for c in tied:
-        if c == 'w' or c == 'g' or c == 'f' or c == 'ø':
+        if c == 'w' or c == 'g' or c == 'f' or c == 'ø' or c == 'γ':
             ar.lajit += c
     if(len(ar.lajit) != len(ajot)*len(paikat)):
-        printf("Varoitus, luettiin %i lajia %i:n sijaan" %(len(ar.lajit), len(ajot)*len(paikat)))
+        print("Varoitus, luettiin %i lajia %i:n sijaan" %(len(ar.lajit), len(ajot)*len(paikat)))
 
 F = np.array(range(1,ar.vuosi1-ar.vuosi0+2)) / (ar.vuosi1-ar.vuosi0+2.0) #kertymäfunktio
 

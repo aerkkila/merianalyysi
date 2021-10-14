@@ -27,17 +27,21 @@ if len(lajit) > 3 and lajit[-4:] == '.txt':
         tied = f.read()
     lajit = ''
     for c in tied:
-        if c == 'w' or c == 'g' or c == 'f' or c == 'ø':
+        if c == 'w' or c == 'g' or c == 'f' or c == 'ø' or c == 'γ':
             lajit += c
     if(len(lajit) != len(ajot)*len(paikat)):
         print("Varoitus, luettiin %i lajia %i:n sijaan" %(len(lajit), len(ajot)*len(paikat)))
 
 def valitse_yhtalot(laji):
     global Fm, xm, Fpalaute
-    if laji == 'g': #gumbel
+    if laji == 'g': #gumbel normaalisti
         Fm = lambda F: -log(-log(F))
         xm = lambda x: x
         Fpalaute = lambda x: exp(-exp(-a*x-b))
+    elif laji == 'γ': #gumbel paksuuden neliöihin
+        Fm = lambda F: -log(-log(F))
+        xm = lambda x: x**2
+        Fpalaute = lambda x: exp(-exp(-a*x**2-b))
     elif laji == 'f': #fréchet
         Fm = lambda F: log(-log(F))
         xm = lambda x: log(x+1e-7)
@@ -47,7 +51,7 @@ def valitse_yhtalot(laji):
         xm = lambda x: log(x+1e-7)
         Fpalaute = lambda x: 1-exp(-x**a*exp(b))
     else:
-        printf("Laji oli %s" %laji)
+        print("Laji oli %s" %laji)
         kautto()
 
 for pind,paikka in enumerate(paikat):
