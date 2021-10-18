@@ -79,6 +79,10 @@ if len(ar.lajit) > 3 and ar.lajit[-4:] == '.txt':
 
 F = np.array(range(1,ar.vuosi1-ar.vuosi0+2)) / (ar.vuosi1-ar.vuosi0+2.0) #kertymäfunktio
 
+ytikit = np.linspace(0,1,11)
+locale.setlocale(locale.LC_ALL, paikallisuus)
+ynimet = [locale.format_string("%.1f",luku) if not i%2 else '' for i,luku in enumerate(ytikit)]
+
 fig = plt.figure(figsize=(12,10))
 for pind,paikka in enumerate(paikat_fi):
     ax = plt.subplot(3,2,pind+1)
@@ -136,6 +140,16 @@ for pind,paikka in enumerate(paikat_fi):
     plt.yticks(fontsize=13)
     plt.xticks(fontsize=13)
     plt.legend(fontsize=9, frameon=0)
+    #ohut viiva y-akselille kohtiin 0,1; 0,5 ja 0,9
+    plt.yticks(ytikit, ynimet, fontsize=12)
+    viivat=plt.gca().yaxis.get_gridlines()
+    for i,viiva in enumerate(viivat):
+        if not i%2:
+            pass
+        elif any((1,5,9)[j] == i for j in range(3)):
+            viiva.set_linestyle(':')
+        else:
+            viiva.set_linestyle('none')
 fig.suptitle("%i–%i"%(ar.vuosi0,ar.vuosi1), fontsize=16)
 plt.tight_layout()
 
