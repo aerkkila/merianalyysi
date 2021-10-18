@@ -21,9 +21,16 @@ pars.add_argument('-v0', '--vuosi0', type=int, default=2052,
 pars.add_argument('-v1', '--vuosi1', type=int, default=2097,
                   help='Viimeinen mukaan otettava vuosi')
 pars.add_argument('-l', '--lajit', default='maksh_loppulajit.txt',
-                  help='Mikä jakauma sovitetaan (w/g/f/ø): Weibull, Gumbel, Fréchet tai ei mikään. Voi antaa yhden lajin, jota käytetään kaikkiin tai jokaiselle eri lajin järjestyksessä paikka,ajo: gwwwgfwwø... tai .txt-päätteisen tiedoston nimen, jossa on lueteltu lajit tuossa järjestyksessä. Tiedostosta luetaan vain nuo kirjaimet (gwfø) ja seassa saa olla muutakin.')
+                  help='Mikä jakauma sovitetaan (w/g/f/γ/ø): Weibull, Gumbel, Fréchet, Gumbel neliöihin tai ei mikään. Voi antaa yhden lajin, jota käytetään kaikkiin tai jokaiselle eri lajin järjestyksessä paikka,ajo: gwwwgfwwø... tai .txt-päätteisen tiedoston nimen, jossa on lueteltu lajit tuossa järjestyksessä. Tiedostosta luetaan vain nuo kirjaimet (gwfγø) ja seassa saa olla muutakin.')
 pars.add_argument('-h0', '--paksraja', type=float, default=1.0,
                   help='Vain tätä suuremmat arvot huomioidaan jakauman sovituksessa.')
+pars.add_argument('-p', '--pienet', default='iso_piste',
+                  help=('Miten merkitään paksrajaa pienemmät arvot:\n'
+                        'iso_ja_kaura: käyrä ekstrapoloidaan ja pisteet muita isompina\n'
+                        'iso_piste: ei käyrää ja pisteet muita isompina\n'
+                        'murtoviiva: pisteet yhdistetään murtoviivalla ja viimeinen yhdistetään käyrän alkuun'))
+pars.add_argument('-x', '--xskaala', default='lineaarinen',
+                  help='\'lineaarinen\' vai \'logaritminen\' x-akseli')
 pars.add_argument('-t', '--tallenna', nargs='?', type=int, const=1, default=0,
                   help='Tallennetaanko kuvat (0/1), oletus on ei. Pelkkä --tallenna riittää myös ilman argumenttia')
 ar = pars.parse_args()
@@ -75,7 +82,15 @@ F = np.array(range(1,ar.vuosi1-ar.vuosi0+2)) / (ar.vuosi1-ar.vuosi0+2.0) #kertym
 fig = plt.figure(figsize=(12,10))
 for pind,paikka in enumerate(paikat_fi):
     ax = plt.subplot(3,2,pind+1)
-    plt.xlim(-0.7,100)
+    if(ar.xskaala == 'logaritminen'):
+        plt.xscale('log')
+        plt.xlim(0.1,100)
+        xlim0 = 0.1
+    elif(ar.xskaala == 'lineaarinen'):
+        plt.xlim(-0.7,100)
+        xlim0 = 0.01
+    else:
+        print('Tuntematon xskaala: ' + ar.xskaala)
     for aind,ajo in enumerate(ajot):
         tiednimi = '%s/%s_%s_%s.txt' %(kansio, nimialku, paikka, ajo)
         tiedos = np.loadtxt(tiednimi, usecols=(0,2))
@@ -88,12 +103,28 @@ for pind,paikka in enumerate(paikat_fi):
             continue
         plt.plot(tiedos, F, '.', color=varit[aind], markersize=1.5)
         F1 = Fm(F); x1 = xm(tiedos)
-        raja = hae_raja(tiedos, ar.paksraja)
+        if(pind==5):
+            rajanyt = 4
+        else:
+            rajanyt = ar.paksraja
+        raja = hae_raja(tiedos, rajanyt)
         a,b,r,p,kkv = linregress(F1[raja:], x1[raja:]) #pienin neliösumma x-suunnassa
         b = -b/a
         a = 1/a
-        xlinsp = np.linspace(0.1,xlim()[1],200)
-        plt.plot(xlinsp, Fpalaute(xlinsp), color=varit[aind], label=ajonimet[aind] + ' (%s)' %laji)
+        if(ar.pienet == 'murtoviiva'):
+            xlinsp = np.linspace(tiedos[raja],xlim()[1],200)
+            plt.plot(xlinsp, Fpalaute(xlinsp), color=varit[aind], label=ajonimet[aind] + ' (%s)' %laji)
+            plt.plot(np.append(tiedos[:raja], xlinsp[0]), np.append(F[:raja], Fpalaute(xlinsp[0])), color=varit[aind])
+        elif(ar.pienet == 'iso_ja_kaura'):
+            xlinsp = np.linspace(xlim0,xlim()[1],200)
+            plt.plot(xlinsp, Fpalaute(xlinsp), color=varit[aind], label=ajonimet[aind] + ' (%s)' %laji)
+            plt.plot(tiedos[:raja], F[:raja], '.', color=varit[aind], markersize=5)
+        elif(ar.pienet == 'iso_piste'):
+            xlinsp = np.linspace(tiedos[raja],xlim()[1],200)
+            plt.plot(xlinsp, Fpalaute(xlinsp), color=varit[aind], label=ajonimet[aind] + ' (%s)' %laji)
+            plt.plot(tiedos[:raja], F[:raja], '.', color=varit[aind], markersize=5)
+        else:
+            print('tuntematon pienten arvojen käsittely: ' + ar.pienet)
 
     plt.grid('on')
     plt.title(paikat[pind], fontsize=15)
@@ -109,6 +140,6 @@ fig.suptitle("%i–%i"%(ar.vuosi0,ar.vuosi1), fontsize=16)
 plt.tight_layout()
 
 if ar.tallenna:
-    plt.savefig('%s/%s_kert%i_%i.png' %(kuvat,nimialku,ar.vuosi0,ar.vuosi1))
+    plt.savefig('%s/%s_kert%i_%i_%s.png' %(kuvat,nimialku,ar.vuosi0,ar.vuosi1, ar.xskaala[:3]))
 else:
     plt.show()
