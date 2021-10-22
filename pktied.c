@@ -17,6 +17,7 @@ const char* const ajot[] = {"A001", "B001", "D001"};
 #endif
 
 int main(int argc, char** argv) {
+  fflush(stdout);
   int ncid, ncpalaute, id;
   size_t xpit, ypit, xy;
   char* apuc = malloc(1000);
@@ -40,16 +41,16 @@ int main(int argc, char** argv) {
   else
     ajoja = sizeof(ajot) / sizeof(*ajot);
   int16_t vuosi0, vuosi1;
-  for(int i=0; i<ajoja; i++) {
-    if(ajot[i][strlen(ajot[i])-1] == '1') {
+  for(int aind=0; aind<ajoja; aind++) {
+    if(ajot[aind][strlen(ajot[aind])-1] == '1') {
       vuosi0 = 1975;
       vuosi1 = 2006;
     } else {
       vuosi0 = 2006;
       vuosi1 = 2100;
     }
-    sprintf(apuc, "pituudet_%s.bin", ajot[i]);
-    FILE *f = fopen(apuc, "wb");
+    sprintf(apuc, "pituudet_%s.bin", ajot[aind]);
+    FILE *f = fopen(apuc, "w");
     if(!f) {
       fprintf(stderr, "Ei avattu ulostuloa\n");
       exit(1);
@@ -58,27 +59,31 @@ int main(int argc, char** argv) {
     fwrite(tmp_pit, 2, 4, f);
     int v = vuosi0;
     while(1) {
-      sprintf(apuc, "%s/%s/%s_%i0101_%i1231_%s", lahdekansio, ajot[i], nimialku, v, v, nimiloppu);
-      printf("\rVuosi %i / %i; ajo %i / %i   ", v-vuosi0+1, vuosi1-vuosi0, i+1, ajoja);
+      sprintf(apuc, "%s/%s/%s_%i0101_%i1231_%s", lahdekansio, ajot[aind], nimialku, v, v, nimiloppu);
+      printf("\rVuosi %i / %i; ajo %i / %i   ", v-vuosi0+1, vuosi1-vuosi0, aind+1, ajoja);
       fflush(stdout);
       NCFUNK(nc_open, apuc, NC_NOWRITE, &ncid);
+      NCFUNK(nc_inq_varid, ncid, "soicecov", &id);
       NCFUNK(nc_get_var, ncid, id, peitt);
       NCFUNK(nc_close, ncid);
       /*ensimmäisenä vuonna ohitetaan alun lukeminen
 	muina vuosina luetaan alku, asetetaan tulos kaikkiin vuosiin, nollataan, luetaan loppu*/
+#define EHTO(taul,ind) (taul[ind] < 2 && taul[ind] >= KONSRAJA)
       if(v != vuosi0) {
 	for(int ind=0; ind<180*xy;)
 	  for(int ruutu=0; ruutu<xy; ruutu++, ind++)
-	    pit_vuosi[ruutu] += peitt[ind] >= KONSRAJA;
+	    pit_vuosi[ruutu] += EHTO(peitt,ind);
 	fwrite(pit_vuosi, xy, 2, f);
       }
       if(++v == vuosi1)
 	break;
+      memset(pit_vuosi, 0, xy*2);
       const int raja = xy*(365+!(v%4));
       for(int ind=244*xy; ind<raja;)
 	for(int ruutu=0; ruutu<xy; ruutu++, ind++)
-	  pit_vuosi[ruutu] += peitt[ind] >= KONSRAJA;
+	  pit_vuosi[ruutu] += EHTO(peitt,ind);
     }
+#undef EHTO
     fclose(f);
   }
   putchar('\n');
