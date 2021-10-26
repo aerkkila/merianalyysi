@@ -4,6 +4,8 @@ import numpy as np
 import struct, sys
 from jaettu import paikat, kuvat
 
+paikat = ('Kemi (Ajos)', 'Kalajoki (Rahja)', 'Korsholm (Valsörarna)', 'Nordmaling (Järnäs)', 'Rauma', 'Söderhamn')
+
 #ensin ajetaan Puhdissa ohjelma paikat_kartalla.c
 #tämä käyttää sen ulostuloa "kartta.bin"
 
@@ -35,7 +37,10 @@ for j in range(ypit):
         if sisalto[sind] > 1:
             pind = sisalto[sind]-2
             jnyt = ypit-1-j
-            text(i-26,jnyt+18,paikat[pind],color=(0,0,0,1),fontsize=12)
+            if(pind == 3):
+                text(i-26,jnyt-10,paikat[pind],color=(0,0,0,1),fontsize=12)
+            else:
+                text(i-26,jnyt+18,paikat[pind],color=(0,0,0,1),fontsize=12)
 
 if sys.argv[-1] == '1':
     savefig("%s/kartta.png"%kuvat)
