@@ -52,11 +52,11 @@ class Jakaumat:
 
 if suomeksi:
     xnimi = 'vuosi'
-    ynimi = 'pinta-ala $(km^2)$'
+    ynimi = 'jään laajuus ($\mathrm{km^2}$)'
     ulaotsikko = 'aikaikkuna = %i vuotta' %aikaikk
 else:
     xnimi = 'year'
-    ynimi = 'area $(km^2)$'
+    ynimi = 'ice extent ($\mathrm{km^2}$)'
     ulaotsikko = 'time window = %i years' %aikaikk
 
 fig = figure(figsize=(12,10))
