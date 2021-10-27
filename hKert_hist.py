@@ -3,7 +3,7 @@
 from matplotlib.pyplot import *
 import numpy as np
 import pandas as pd
-from scipy.stats import *
+from scipy.stats import ks_2samp
 from jaettu import *
 import locale, sys
 import matplotlib.ticker as ticker
@@ -37,13 +37,13 @@ for pind,paikka in enumerate(nimet):
         tiedos = np.loadtxt(tied, usecols=(0));
         tiedos = np.sort(tiedos)
         kaikki_tkset[aind][31*pind:31*(pind+1)] = tiedos
-        plot(tiedos, ytiedos, color=varit[aind*2], label=ajonimet_hist[aind])
+        plot(tiedos, ytiedos, color=varit[aind*2+1], label=ajonimet_hist[aind])
         print(tiedos[np.where(tiedos > 100)])
     hnto = hnnot[paikka][np.arange(v0[pind],v1[pind]+1)]
     hnto = np.sort(hnto)
     hnto = hnto[np.where(~np.isnan(hnto))]
     kaikki_hnnot[31*pind:31*(pind+1)] = hnto
-    plot(hnto, ytiedos, color='y', label='observations')
+    plot(hnto, ytiedos, color='k', label='observations')
     legend(fontsize=10,frameon=False)
     grid('on')
     tight_layout()
@@ -52,12 +52,15 @@ if(sys.argv[-1] == '1'):
     savefig('%s/maksh_kert_hist.png' %kuvat)
 else:
     show()
+close(fig)
 
 kaikki_hnnot = np.sort(kaikki_hnnot)
 ytiedos = np.arange(1,31*len(nimet)+1) / (len(nimet)*31+1)
-plot(kaikki_hnnot, ytiedos, color='y', label='observations')
+plot(kaikki_hnnot, ytiedos, color='k', label='observations')
 for i,t in enumerate(kaikki_tkset):
-    plot(np.sort(t), ytiedos, color=varit[i*2], label=ajonimet_hist[i])
+    t = np.sort(t)
+    plot(t, ytiedos, color=varit[i*2+1], label=ajonimet_hist[i])
+    print(ks_2samp(kaikki_hnnot, t).pvalue)
 legend()
 grid('on')
 xlim((0,120))
