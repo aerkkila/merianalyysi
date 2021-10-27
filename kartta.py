@@ -4,12 +4,12 @@ import numpy as np
 import struct, sys
 from jaettu import paikat, kuvat
 
-paikat = ('Kemi (Ajos)', 'Kalajoki (Rahja)', 'Korsholm (Valsörarna)', 'Nordmaling (Järnäs)', 'Rauma', 'Söderhamn')
+paikat = ('Kemi (Ajos)', 'Kalajoki (Rahja)', 'Korsholm (Vallgrund)', 'Nordmaling (Järnäs)', 'Rauma', 'Söderhamn')
 
 #ensin ajetaan Puhdissa ohjelma paikat_kartalla.c
 #tämä käyttää sen ulostuloa "kartta.bin"
 
-with open("kartta.bin", "rb") as f:
+with open('kartta.bin', "rb") as f:
     sisalto = f.read()
 xpit, = struct.unpack("i", sisalto[0:4])
 ypit, = struct.unpack("i", sisalto[4:8])
