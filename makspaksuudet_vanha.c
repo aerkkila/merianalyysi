@@ -8,34 +8,32 @@ typedef struct {
   int paikka;
 } maks_t;
 
+#ifndef KONSRAJA
+#define KONSRAJA -1
+#endif
 /*Paksuuksia ei enää lasketa samana talvena, jos tietyn päivän (PAIVARAJA)
   jälkeen on riittävästi päiviä peräkkäin (N_PAIVIA),
   jolloin paksuus on enintään OHUUSRAJA*/
 #ifndef PAIVARAJA
-#define PAIVARAJA 80
+#define PAIVARAJA 400
 #endif
 #ifndef N_PAIVIA
-#define N_PAIVIA 5
+#define N_PAIVIA 400
 #endif
 #ifndef OHUUSRAJA
-#define OHUUSRAJA 0.6
-#endif
-#ifndef KASVURAJA
-#define KASVURAJA 30.0
+#define OHUUSRAJA -1
 #endif
 
-maks_t hae_maksimi(float* h, short* d, int pit) {
+maks_t hae_maksimi(float* h, float* c, short* d, int pit) {
   maks_t r = (maks_t){h[0], 0};
   int n_paivia = 0;
   
   for(int i=1; i<pit; i++) {
-    if (h[i] > r.arvo) {
+    if (h[i] > r.arvo && c[i] > KONSRAJA) {
       r = (maks_t){h[i], i};
       continue;
     }
     if (d[i] > PAIVARAJA && d[i] < 240) {
-      if(h[i+1]-h[i] >= KASVURAJA)
-	return r;
       if (h[i] < OHUUSRAJA) {
 	if (++n_paivia >= N_PAIVIA)
 	  return r;
@@ -47,7 +45,7 @@ maks_t hae_maksimi(float* h, short* d, int pit) {
 }
 
 /*vaihtaa a:ssa b:n tilalle c:n*/
-char* korvaa_strstr(char* a, const char* restrict b, const char* restrict c) {
+char* korvaa_strstr(char* a, char* b, char* c) {
   char* kohta0 = strstr(a, b);
   if(!kohta0)
     return NULL;
@@ -58,9 +56,6 @@ char* korvaa_strstr(char* a, const char* restrict b, const char* restrict c) {
   strcat(a, loppu);
   return a;
 }
-
-const char* vanha_tunniste = "tilavuudet_hist_";
-const char* uusi_tunniste = "maksh_hist_";
 
 int main() {
   const char* kansio = "/home/aerkkila/b/tiedokset";
@@ -76,17 +71,23 @@ int main() {
   short* vuosi = malloc(PIT*sizeof(short));
   short* paiva = malloc(PIT*sizeof(short));
   float* paks = malloc(PIT*sizeof(float));
+  float* kons = malloc(PIT*sizeof(float));
 #undef PIT
   int ind;
   while((e = readdir(d))) {
     /*haetaan yksi kerrallaan oikeat paksuustiedostot*/
-    if(!strstr(e->d_name, vanha_tunniste))
+    if(!strstr(e->d_name, "paksuudet_"))
       continue;
     sprintf(hnimi, "%s/%s", kansio, e->d_name);
 
+    /*vastaava konsentraatiotiedosto*/
+    strcpy(cnimi, hnimi);
+    cnimi = korvaa_strstr(cnimi, "paksuudet_", "peittävyydet_");
+
     FILE* fh = fopen(hnimi, "r");
-    if(!fh) {
-      fprintf(stderr, "Ei avattu tiedostoa \"%s\"\n", hnimi);
+    FILE* fc = fopen(cnimi, "r");
+    if(!fc || !fh) {
+      fprintf(stderr, "Ei avattu tiedostoa \"%s\"\n", (!fc)? cnimi : hnimi);
       return 1;
     }
 
@@ -96,10 +97,12 @@ int main() {
       int tmp;
       if((tmp = fscanf(fh, "%f%hi%hi", paks+ind, paiva+ind, vuosi+ind)) != 3)
 	break;
+      if(fscanf(fc, "%f%*i%*i", kons+ind) != 1)
+	fprintf(stderr, "Virhe, peittävyyttä ei luettu\n");
       ind++;
     }
 
-    if(!(korvaa_strstr(hnimi, vanha_tunniste, uusi_tunniste))) {
+    if(!(korvaa_strstr(hnimi, "paksuudet_", "maksh_"))) {
       fprintf(stderr, "Virhe, tunnistetta ei löytynyt nimestä\n");
       return 1;
     }
@@ -113,17 +116,19 @@ int main() {
     short* paiva1 = paiva;
     short* vuosi1 = vuosi;
     float* paks1 = paks;
+    float* kons1 = kons;
     
-    maks_t m = hae_maksimi(paks, paiva, 244);
+    maks_t m = hae_maksimi(paks, kons, paiva, 244);
     fprintf(fh, "%5.1f\t%hi\t%hi\n", m.arvo, paiva1[m.paikka], vuosi1[m.paikka]);
 
     paks1 += 244;
+    kons1 += 244;
     paiva1 += 244;
     vuosi1 += 244;
     ind -= 244;
 
     while(ind>360) { //kun voidaan vielä lukea koko vuosi
-      m = hae_maksimi(paks1, paiva1, 366);
+      m = hae_maksimi(paks1, kons1, paiva1, 366);
       short tmppaiva = ((paiva1[m.paikka]+122) % 366) - 122;
       short tmpvuosi = vuosi1[m.paikka];
       if(tmppaiva < 0)
@@ -131,22 +136,27 @@ int main() {
       fprintf(fh, "%5.1f\t%hi\t%hi\n", m.arvo, tmppaiva, tmpvuosi);
 
       paks1 += 366;
+      kons1 += 366;
       paiva1 += 366;
       vuosi1 += 366;
       ind -= 366;
     }
     fclose(fh);
+    fclose(fc);
   }
   FILE* f = fopen("maksh_parametrit.txt", "w");
   fprintf(f, ("n_päiviä = %i\n"
 	      "päiväraja = %i\n"
-	      "ohuusraja = %.4f cm\n"),
-	  N_PAIVIA, PAIVARAJA, (float)OHUUSRAJA);
+	      "ohuusraja = %.4f cm\n"
+	      "peittävyysraja = %.4f\n"),
+	  N_PAIVIA, PAIVARAJA, (float)OHUUSRAJA, (float)KONSRAJA);
   fclose(f);
+  free(cnimi);
   free(hnimi);
   free(vuosi);
   free(paiva);
   free(paks);
+  free(kons);
   closedir(d);
   return 0;
 }
