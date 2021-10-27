@@ -6,9 +6,11 @@ kansio = '/home/aerkkila/b/tiedokset'
 ajot = ("A002", "A005", "B002", "B005", "D002", "D005")
 ajot_hist = ('A001', 'B001', 'D001')
 ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5")
+ajonimet_hist = ("Max Planck", "EC-Earth", "Hadley Centre")
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue")
 paikat_fi = ('Kemi', 'Kalajoki', 'Mustasaari', 'Nordmaling', 'Rauma', 'Söderhamn')
 paikat_en = ('Kemi', 'Kalajoki', 'Korsholm', 'Nordmaling', 'Rauma', 'Söderhamn')
+paikat_hist = ('Tornio', 'Kemi', 'Hailuoto', 'Raahe', 'Kalajoki', 'Kokkola', 'Mustasaari', 'Ratan', 'Nordmaling')
 
 suomeksi = False
 if suomeksi:
