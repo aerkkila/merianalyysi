@@ -23,53 +23,46 @@ hnnot = pd.read_csv('../perämeri.csv', index_col=0)
 fig = figure(figsize=(12,12))
 axs = fig.subplots(3,3).flatten()
 ytiedos = np.arange(1,32) / 32
+kaikki_hnnot = np.empty(len(nimet)*31)
+kaikki_tkset = [[]]*3
+for i in range(3):
+    kaikki_tkset[i] = np.empty_like(kaikki_hnnot)
+
 for pind,paikka in enumerate(nimet):
     sca(axs[pind])
+    xlim((0,120))
     print(paikka)
     for aind,ajo in enumerate(ajot_hist):
         tied = "%s/maksh_hist_%s_%s.txt" %(kansio, tnimet[pind], ajo);
         tiedos = np.loadtxt(tied, usecols=(0));
         tiedos = np.sort(tiedos)
+        kaikki_tkset[aind][31*pind:31*(pind+1)] = tiedos
         plot(tiedos, ytiedos, color=varit[aind*2], label=ajonimet_hist[aind])
         print(tiedos[np.where(tiedos > 100)])
-    print(v0[pind])
-    print(v1[pind])
     hnto = hnnot[paikka][np.arange(v0[pind],v1[pind]+1)]
     hnto = np.sort(hnto)
     hnto = hnto[np.where(~np.isnan(hnto))]
+    kaikki_hnnot[31*pind:31*(pind+1)] = hnto
     plot(hnto, ytiedos, color='y', label='observations')
     legend(fontsize=10,frameon=False)
     grid('on')
+    tight_layout()
     title(paikka)
-show()
-exit()
-
-
-for p in range(len(paikat)):
-    ax = plt.subplot(3,2,p+1);
-    
-    if(p < len(paikkaind)): #havainnot
-        htmp = np.sort(hnnot[p]);
-        F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #diskreetti kertymäfunktio
-        plt.plot(htmp, F, color='k', label="havainnot");        
-    for a in range(len(ajot)): #malli
-        htmp = np.sort(paikka_ajo[p][a])
-        F = np.array(range(1,len(htmp)+1)) / (len(htmp)+1.0); #diskreetti kertymäfunktio
-        plt.plot(htmp, F, color=varit[a], label=ajonimet[a]);
-    
-    plt.grid('on')
-    plt.title(paikat[p], fontsize=15);
-    paikallista_akselit();
-    plt.ylim(0,1)
-    plt.xlim(0,110)
-    plt.ylabel('Todennäköisyyskertymä',fontsize=15)
-    plt.xlabel('Paksuuden vuosimaksimi (cm)',fontsize=15)
-    plt.yticks(fontsize=13);
-    plt.xticks(fontsize=13);
-    plt.legend(ncol=1, fontsize=11, loc='upper left', frameon=0);
-    plt.tight_layout();
-
-if len(sys.argv)==2 and sys.argv[1]=='1':
-    plt.savefig('/home/aerkkila/a/kuvat1/pakskert_hist.png');
+if(sys.argv[-1] == '1'):
+    savefig('%s/maksh_kert_hist.png' %kuvat)
 else:
-    plt.show();
+    show()
+
+kaikki_hnnot = np.sort(kaikki_hnnot)
+ytiedos = np.arange(1,31*len(nimet)+1) / (len(nimet)*31+1)
+plot(kaikki_hnnot, ytiedos, color='y', label='observations')
+for i,t in enumerate(kaikki_tkset):
+    plot(np.sort(t), ytiedos, color=varit[i*2], label=ajonimet_hist[i])
+legend()
+grid('on')
+xlim((0,120))
+tight_layout()
+if(sys.argv[-1] == '1'):
+    savefig('%s/maksh_kert_hist_kaikki.png' %kuvat)
+else:
+    show()
