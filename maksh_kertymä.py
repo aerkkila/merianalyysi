@@ -13,7 +13,7 @@ if suomeksi:
     ynimi = 'Todennäköisyyskertymä'
 else:
     xnimi = 'Maximum thickness (cm)'
-    ynimi = 'Cumulative propability'
+    ynimi = 'Cumulative probability'
 
 pars = argparse.ArgumentParser()
 pars.add_argument('-v0', '--vuosi0', type=int, default=2052,
@@ -24,7 +24,7 @@ pars.add_argument('-l', '--lajit', default='maksh_loppulajit.txt',
                   help='Mikä jakauma sovitetaan (w/g/f/γ/ø): Weibull, Gumbel, Fréchet, Gumbel neliöihin tai ei mikään. Voi antaa yhden lajin, jota käytetään kaikkiin tai jokaiselle eri lajin järjestyksessä paikka,ajo: gwwwgfwwø... tai .txt-päätteisen tiedoston nimen, jossa on lueteltu lajit tuossa järjestyksessä. Tiedostosta luetaan vain nuo kirjaimet (gwfγø) ja seassa saa olla muutakin.')
 pars.add_argument('-h0', '--paksraja', type=float, default=1.0,
                   help='Vain tätä suuremmat arvot huomioidaan jakauman sovituksessa.')
-pars.add_argument('-p', '--pienet', default='iso_piste',
+pars.add_argument('-p', '--pienet', default='iso_ja_kaura',
                   help=('Miten merkitään paksrajaa pienemmät arvot:\n'
                         'iso_ja_kaura: käyrä ekstrapoloidaan ja pisteet muita isompina\n'
                         'iso_piste: ei käyrää ja pisteet muita isompina\n'

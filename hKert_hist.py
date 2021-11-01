@@ -64,6 +64,8 @@ for i,t in enumerate(kaikki_tkset):
 legend()
 grid('on')
 xlim((0,120))
+xlabel('Maximum thickness (cm)')
+ylabel('Cumulative probability')
 tight_layout()
 if(sys.argv[-1] == '1'):
     savefig('%s/maksh_kert_hist_kaikki.png' %kuvat)
