@@ -6,7 +6,6 @@
 //#include <zip.h>
 #include <dirent.h>
 
-//const char* lahdekansio = "/mnt/share/data/balticsea/icechart/netcdf";
 const char* lahdekansio = "/home/aerkkila";
 
 const double r        = 6371229;
@@ -14,22 +13,22 @@ const float latraja  = 60.2;
 #ifndef KONSRAJA
 #define KONSRAJA 0.0
 #endif
-#define NCVIRHE(arg) printf("Virhe: %s\n", nc_strerror(arg))
+#define NCVIRHE(arg) do {printf("Virhe: %s\n", nc_strerror(arg)); exit(1);} while(0)
 #define NCFUNK(fun, ...)			\
   do {						\
     if((ncpalaute = fun(__VA_ARGS__)))		\
       NCVIRHE(ncpalaute);			\
   } while(0)
 
-const int yalku1=1600, yloppu1=3120;
+//const int yalku1=1600, yloppu1=3120;
 const int ypit2=3120, xpit2=2640;
 const int xpit0=700; //muutettaessa huomioitakoon myös countpt
-const size_t countpt0[] = {700, 1};
-const size_t countpt1[] = {2640, 1520};
-size_t alkupiste, loppupiste;
-int ypit0, yalku0;
+const size_t countpt0[] = {1, 1, 700};
+//const size_t countpt1[] = {2640, 1520};
+//size_t alkupiste, loppupiste;
+int ypit0, yalku0=0;
 int ncpalaute;
-float *lat, *lon;
+float *lat, *lon, *lat0;
 double *var, *alat;
 FILE* f_ulos;
 
@@ -38,21 +37,21 @@ int pura_seuraava(DIR *d, char* volatile polku, char* osanimi);
 void poista_tiedosto(const char* nimi);
 int avaa_netcdf(const char* restrict);
 void lue_koordinaatit1(int ncid);
-void maarita_i_alut(float* lat, float* lon, int* i_alku);
+void maarita_i_alut(int* i_alku);
 void lue_muuttuja0(int ncid, int* i_alku);
-void lue_koordinaatit0(int ncid, int* i_alku);
-void laske_pintaalat();
+void laske_pintaalat(int* i_alku);
+double maarita_laajuus();
 
 /*Tarvittavat koot ovat
   xypit2: koko kartan koko
-  xypit1: yhtenäisen enintään luettavan alueen koko
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300], *apuc1;
   int vuosi0=1980, vuosi1=2010;
-  alkupiste  = yalku1*xpit2;
-  loppupiste = yloppu1*xpit2;
-  size_t xypit1=loppupiste-alkupiste, xypit2=xpit2*ypit2;
+  //alkupiste  = yalku1*xpit2;
+  //loppupiste = yloppu1*xpit2;
+  //size_t xypit1 = loppupiste-alkupiste;
+  size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
   if(argc > 1)
@@ -62,9 +61,8 @@ int main(int argc, char** argv) {
     if(sscanf(argv[2], "%i", &vuosi1)!=1)
       printf("Ei luettu loppuvuotta\n");
 
-  /*nämä voivat olla liian suuria mahtuakseen pinomuistiin*/
-  lat = malloc(xypit1*sizeof(float));
-  lon = malloc(xypit1*sizeof(float));
+  lat = malloc(ypit2*sizeof(float));
+  lon = malloc(xpit2*sizeof(float));
   sprintf(apuc, "laajuudet%.0f_kartasta.txt", round(KONSRAJA*100));
   FILE* f_ulos = fopen(apuc, "w");
 
@@ -78,26 +76,23 @@ int main(int argc, char** argv) {
   lue_koordinaatit1(ncid);
 
   /*tarkempi alkupiste*/
-  int lisa = 0;
-  while(lat[++lisa] < latraja);
-  int tmp = alkupiste + lisa; //x=0, ei kohta jossain keskellä x≠0
+  while(lat[++yalku0] < latraja);
+  ypit0 = ypit2-yalku0;
+  lat0 = lat+yalku0;
 
-  size_t xypit0 = xypit2 - tmp;
-  ypit0 = xypit0 / xpit2;
-  if(xypit0 % xpit2)
-    printf("Varoitus: aloituskohta ei ollut nurkassa: xypit0 = %lu\n", xypit0);
+  size_t xypit0 = ypit0 * xpit0;
   int i_alku[ypit0];
-  maarita_i_alut(lat, lon, i_alku);
+  maarita_i_alut(i_alku);
   var = malloc(xypit0*sizeof(double));
   alat= malloc(xypit0*sizeof(double));
-  lat = realloc(lat, xypit0*sizeof(float)); //lyhennetään näitä
-  lon = realloc(lon, xypit0*sizeof(float));
+  laske_pintaalat(i_alku);
+  
+  lue_muuttuja0(ncid, i_alku);
+  double pa = maarita_laajuus();
+  printf("%lf\n", pa/1.0e6);
 
-  yalku0 = ypit2-ypit0;
-  lue_koordinaatit0(ncid, i_alku);
-
-  poista_tiedosto(apuc1);
   NCFUNK(nc_close, ncid);
+  //poista_tiedosto(apuc1);
   closedir(d);
   free(lat); free(lon); free(var); free(alat);
   fclose(f_ulos);
@@ -138,14 +133,14 @@ void poista_tiedosto(const char* nimi) {
   system(kmnt);
 }
 
-/*alueesta luetaan aina xpit0:n pituinen pätkä y:n mukaan vaihtelevasta alkukohdasta*/
-void maarita_i_alut(float* lat, float* lon, int* i_alku) {
+/*alueesta luetaan aina xpit0:n pituinen pätkä y:n mukaan vaihtelevasta alkukohdasta
+  lat ja lon ovat koko alueesta tässä vaiheessa*/
+void maarita_i_alut(int* i_alku) {
   int j=0;
-  int ind=0;
   int lukema = 950;
-  while(lat[ind+=xpit2] < 63.0)
+  while(lat0[j] < 63.0)
     i_alku[j++] = lukema;
-  while(lat[ind+=xpit2] < 64.68)
+  while(lat0[j] < 64.68)
     i_alku[j++] = ++lukema;
   while(j < ypit0)
     i_alku[j++] = lukema;
@@ -168,50 +163,38 @@ int avaa_netcdf(const char* restrict tnimi) {
 
 void lue_koordinaatit1(int ncid) {
   int id;
-  size_t alku[] = {0, yalku1};
+  //size_t alku[] = {0, yalku1};
   NCFUNK(nc_inq_varid, ncid, "lat", &id);
-  NCFUNK(nc_get_vara, ncid, id, alku, countpt1, lat);
+  NCFUNK(nc_get_var, ncid, id, lat);
   NCFUNK(nc_inq_varid, ncid, "lon", &id);
-  NCFUNK(nc_get_vara, ncid, id, alku, countpt1, lon);
-}
-
-void lue_koordinaatit0(int ncid, int* i_alku) {
-  int idlat, idlon;
-  NCFUNK(nc_inq_varid, ncid, "lat", &idlat);
-  NCFUNK(nc_inq_varid, ncid, "lon", &idlon);
-  size_t alku[] = {-1, yalku0-1};
-  for(int j=0; j<ypit0; j++) {
-    alku[0] = i_alku[j];
-    alku[1]++;
-    NCFUNK(nc_get_vara, ncid, idlat, alku, countpt0, lat+j*xpit0);
-    NCFUNK(nc_get_vara, ncid, idlat, alku, countpt0, lon+j*xpit0);
-  }
+  NCFUNK(nc_get_var, ncid, id, lon);
 }
 
 void lue_muuttuja0(int ncid, int* i_alku) {
   int id;
   NCFUNK(nc_inq_varid, ncid, "kFmiIceConcentration", &id);
-  size_t alku[] = {-1, yalku0-1};
+  size_t alku[3] = { [0] = 0, [1] = yalku0-1 };
   for(int j=0; j<ypit0; j++) {
-    alku[0] = i_alku[j];
+    alku[2] = i_alku[j];
     alku[1]++;
-    NCFUNK(nc_get_vara, ncid, id, alku, countpt0, lat+j*xpit0);
+    NCFUNK(nc_get_vara, ncid, id, alku, countpt0, var+j*xpit0);
   }
 }
 
 #define PINTAALA(lat1, lat2, lon1, lon2) (((lon2)-(lon1))*r*r*(sinf(lat2)-sinf(lat1))*1.0e-6)
 #define RAD(a) ((a)*0.017453293)
 
-void laske_pintaalat() {
+void laske_pintaalat(int* i_alku) {
 #ifdef TALLENNA_PINTAALAT
   FILE *f = fopen("hilan_pintaalat.txt", "w");
 #endif
   for(int j=0; j<ypit0-1; j++)
     for(int i=0; i<xpit0-1; i++) {
-      float lat1=lat[j*xpit0+i], lat2=lat[(j+1)*xpit0+i], lon1=lon[j*xpit0+i], lon2=lon[j*xpit0+i+1];
+      float lat1=lat0[j], lat2=lat0[j+1], lon1=lon[i_alku[j]+i], lon2=lon[i_alku[j]+i+1];
       alat[j*xpit0+i] = PINTAALA(RAD(lat1), RAD(lat2), RAD(lon1), RAD(lon2));
 #ifdef TALLENNA_PINTAALAT 
-      fprintf(f, "%.5lf\t%i\t%i\t%.3f\t%.3f\t%.3f\t%.3f\n", alat[j*xpit0+i], j, i, lat[j*xpit0+i], lat[(j+1)*xpit0+i], lon[j*xpit0+i], lon[j*xpit0+i+1]);
+      fprintf(f, "%.5lf\t%i\t%i\t%.3f\t%.3f\t%.3f\t%.3f\n",
+	      alat[j*xpit0+i], j, i, lat0[j], lat0[j+1], lon[i_alku[j]+i], lon[i_alku[j]+i+1]);
 #endif
     }
 #ifdef TALLENNA_PINTAALAT
@@ -219,13 +202,10 @@ void laske_pintaalat() {
 #endif
 }
 
-#if 0
+double maarita_laajuus() {
   double pa = 0;
-  for(int j=0; j<ypit-1; j++)
+  for(int j=0; j<ypit0-1; j++)
     for(int i=0; i<xpit0-1; i++)
-      pa += (kons[j*xpit0+i] >= KONSRAJA) * alat[j*xpit0+i];
-  fprintf(f_ulos, "%6.0lf\n", round(pa)); //,\t%3i\t%4i\n", round(pa), paiva+1, vuosi);
-  }
-  return 0;
+      pa += (var[j*xpit0+i] >= KONSRAJA) * var[j*xpit0+i];
+  return pa;
 }
-#endif
