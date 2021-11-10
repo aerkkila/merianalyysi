@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
 	printf("Virheellinen tiedostonnimi: \"%s\"\n", tiedostonnimi);
 	exit(1);
       }
-      fprintf(f_ulos, "%lf\t%i\t%i\n", pa, paiv, vuos);
+      fprintf(f_ulos, "%6.0lf\t%i\t%i\n", pa, paiv, vuos);
       NCFUNK(nc_close, ncid);
       //poista_tiedosto(lis.p[i]);
     }
