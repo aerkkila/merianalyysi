@@ -26,6 +26,21 @@ for jasen in ['10', '50', '90']:
         title(ajonimet[kind*2][:-len(' M.N')])
         clim(0,225)
         axis(False)
+        
+    #jääkartta
+    with open("pituuskartat1_kartoista.bin", "rb") as f:
+        sisalto = f.read()
+    xpit,ypit,v0,v1 = struct.unpack('hhhh', sisalto[0:8])
+    fig.add_axes((0.45, 0, 0.44, 0.45))
+    kuva = np.empty((ypit,xpit), dtype=int)
+    muoto = 'h'*xpit
+    for j in range(ypit):
+        kuva[ypit-1-j,:] = struct.unpack(muoto, sisalto[8+j*xpit*2:8+(j+1)*xpit*2])
+    imshow(kuva,cmap=get_cmap('magma'))
+    title("Ice chart")
+    clim(0,225)
+    axis(False)
+    
     alue = fig.add_axes((0.9,0.1,0.05,0.8))
     colorbar(cax=alue)
     if(sys.argv[-1] == '1'):
