@@ -190,6 +190,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis) {
     listalle(lis, strdup(e->d_name));
   }
   uint32_t* luvut[2];
+  char* apu[lis->pit];
   for(int i=0; i<2; i++)
     luvut[i] = malloc(lis->pit*4);
   for(int i=0; i<lis->pit; i++)
@@ -202,16 +203,17 @@ void nimet_jarjestuksessa(DIR* d, lista* lis) {
       lasku[luvut[0][i]>>siirto & 0xff]++;
     for(int i=1; i<256; i++)
       lasku[i] += lasku[i-1];
-    for(int i=lis->pit-1; i>=0; i--)
-      luvut[1][--lasku[luvut[0][i]>>siirto & 0xff]] = luvut[0][i];
+    for(int i=lis->pit-1; i>=0; i--) {
+      int ind = --lasku[luvut[0][i]>>siirto & 0xff];
+      luvut[1][ind] = luvut[0][i];
+      if(j%2)
+	lis->p[ind] = apu[ind];
+      else
+	apu[ind] = lis->p[i];
+    }
     uint32_t* tmp = luvut[0];
     luvut[0] = luvut[1];
     luvut[1] = tmp;
-  }
-  char tmp[9];
-  for(int i=0; i<lis->pit; i++) {
-    sprintf(tmp, "%8i", luvut[0][i]);
-    memcpy(lis->p[i], tmp, 8);
   }
   for(int i=0; i<2; i++)
     free(luvut[i]);

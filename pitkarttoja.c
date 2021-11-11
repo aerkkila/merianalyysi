@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+/*Tekee kartan tietyistä pituuden prosenttiosuuksista,
+  kun pituuskartat on jo laskettu ohjelmilla pktied.c (simulaatio) ja pitkart_kartoista.c (jääkartat)*/
 
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
-const char* const kirjaimet = "ABD";
+const char* const kirjaimet = "ABDK";
 
 int main() {
   char* ulosnimet[3];
@@ -25,7 +29,7 @@ int main() {
   int vuosia = otsake[3]-otsake[2];
   short vuodet[vuosia];
   short lvuodet[vuosia];
-  int kohdat[] = {vuosia/10-1, vuosia/2-1, vuosia/10*9-1};
+  int kohdat[] = {(int)round(vuosia/10.0)-1, vuosia/2-1, (int)round(vuosia/10.0*9)-1};
 
   /*kuvien alustamiset*/
   FILE* kuvat[3];
@@ -57,10 +61,15 @@ int main() {
 
 int pitdet[367] = {0};
 inline void __attribute__((always_inline)) laskentalajittele(short* a, int pit, short* ulos) {
-  for(int i=0; i<pit; i++)
+  for(int i=0; i<pit; i++) {
+#ifdef DEBUG
+    if(i > 350 || i < 0)
+      asm("int $3");
+#endif
     pitdet[a[i]]++;
+  }
   int uind = 0;
-  for(int i=0; i<367; i++) {
+  for(int i=0; uind<pit; i++) { //lopettaa kun kaikki on löytynyt, mikä on ennen kuin i==imax
     for(int m=0; m<pitdet[i]; m++)
       ulos[uind++] = i;
     pitdet[i] = 0;
