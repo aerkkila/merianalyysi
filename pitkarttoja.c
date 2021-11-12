@@ -29,7 +29,7 @@ int main() {
   int vuosia = otsake[3]-otsake[2];
   short vuodet[vuosia];
   short lvuodet[vuosia];
-  int kohdat[] = {(int)round(vuosia/10.0)-1, vuosia/2-1, (int)round(vuosia/10.0*9)-1};
+  int kohdat[] = {(int)round((vuosia+1)*0.1)-1, (int)round((vuosia+1)*0.5)-1, (int)round((vuosia+1)*0.9)-1};
 
   /*kuvien alustamiset*/
   FILE* kuvat[3];
@@ -69,9 +69,8 @@ inline void __attribute__((always_inline)) laskentalajittele(short* a, int pit, 
     pitdet[a[i]]++;
   }
   int uind = 0;
-  for(int i=0; uind<pit; i++) { //lopettaa kun kaikki on löytynyt, mikä on ennen kuin i==imax
+  for(int i=0; uind<pit; i++) //lopettaa kun kaikki on löytynyt, mikä on ennen kuin i==imax
     for(int m=0; m<pitdet[i]; m++)
       ulos[uind++] = i;
-    pitdet[i] = 0;
-  }
+  memset(pitdet, 0, 367*sizeof(int));
 }
