@@ -13,7 +13,7 @@ const char* nimiloppu = "grid_T.nc";
 
 const char* const ajot[] = {"A001", "B001", "D001"};
 #ifndef KONSRAJA
-#define KONSRAJA 0.15
+#define KONSRAJA 0.1
 #endif
 
 int main(int argc, char** argv) {
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     while(1) {
       sprintf(apuc, "%s/%s/%s_%i0101_%i1231_%s", lahdekansio, ajot[aind], nimialku, v, v, nimiloppu);
       printf("\rVuosi %i / %i; ajo %i / %i   ", v-vuosi0+1, vuosi1-vuosi0, aind+1, ajoja);
-      fflush(stdout);
+      //fflush(stdout);
       NCFUNK(nc_open, apuc, NC_NOWRITE, &ncid);
       NCFUNK(nc_inq_varid, ncid, "soicecov", &id);
       NCFUNK(nc_get_var, ncid, id, peitt);
