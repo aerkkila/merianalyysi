@@ -17,7 +17,15 @@ for nimi in os.listdir(sys.argv[1]):
     tiedos = np.loadtxt(sys.argv[1]+nimi, dtype='float32')
     ulosnimi = sys.argv[3] + nimi[len(sys.argv[2]):] #vaihdetaan tunniste
     f = open(sys.argv[1]+ulosnimi, "w")
-    for i in range(0, len(tiedos[:,0]), 366):
-        ind = np.nanargmax(tiedos[i:i+366,0])
+    i=0
+    while i < len(tiedos[:,0]):
+        vuosi = tiedos[i,2]
+        pit = 0
+        for v in tiedos[i:,2]:
+            pit += 1
+            if v != vuosi:
+                break
+        ind = np.nanargmax(tiedos[i:i+pit,0])
         f.write(muoto %(tiedos[ind+i,0],tiedos[ind+i,1],tiedos[ind+i,2]))
+        i += pit
     f.close()

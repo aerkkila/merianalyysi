@@ -4,17 +4,17 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
-//#include <zip.h>
 #include <dirent.h>
 
-const char* lahdekansio = "/home/aerkkila";
+const char* lahdekansio = "/home/aerkkila/b/jääkartat";
+const char* nckansio = "/home/aerkkila/b/jääkartat/netcdf/";
 
 const double R2      = 40592558970441; //(6371229 m)^2
 const float latraja  = 60.2;
 #ifndef KONSRAJA
-#define KONSRAJA 0.01 //prosentteina
+#define KONSRAJA 1.0 //prosentteina
 #endif
-#define NCVIRHE(arg) do {printf("Virhe: %s\n", nc_strerror(arg)); exit(1);} while(0)
+#define NCVIRHE(arg) do {printf("Netcdf-virhe: %s\n", nc_strerror(arg)); exit(1);} while(0)
 #define NCFUNK(fun, ...)			\
   do {						\
     if((ncpalaute = fun(__VA_ARGS__)))		\
@@ -30,7 +30,6 @@ typedef struct {
 void listalle(lista*, char*);
 void poista_lista(lista*);
 
-//const int yalku1=1600, yloppu1=3120;
 const int ypit2=3120, xpit2=2640;
 const int xpit0=700; //muutettaessa huomioitakoon myös countpt
 const size_t countpt0[] = {1, 1, 700};
@@ -57,7 +56,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis);
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300];
-  int vuosi0=1980, vuosi1=2011;
+  int vuosi0=1980, vuosi1=2007;
   size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
@@ -70,14 +69,13 @@ int main(int argc, char** argv) {
 
   lat = malloc(ypit2*sizeof(float));
   lon = malloc(xpit2*sizeof(float));
-  sprintf(apuc, "laajuudet%.0f_kartasta.txt", round(KONSRAJA*100));
-  FILE* f_ulos = fopen(apuc, "w");
 
   char kansionimi[80];
   DIR* d = avaa_vuosi(1980, kansionimi);
   strcpy(apuc, kansionimi);
-  char tiedostonnimi[40];
-  if(pura_seuraava(d, apuc, tiedostonnimi)) {
+  char tiedostonnimi[120];
+  strcpy(tiedostonnimi, nckansio);
+  if(pura_seuraava(d, apuc, tiedostonnimi+strlen(tiedostonnimi))) {
     printf("Ei purettu yhtään vuodesta 1980\n");
     exit(1);
   }
@@ -100,6 +98,7 @@ int main(int argc, char** argv) {
   closedir(d);
   lista lis = {.patka=20, .tilaa=20, .pit=0, .p=NULL};
   lis.p = malloc(20*sizeof(char*));
+  FILE* f_ulos = fopen("laajuudet_K001.txt", "w");
 
   int paiv, vuos;
   for(int vuosi=vuosi0; vuosi<vuosi1; vuosi++) {
@@ -110,19 +109,20 @@ int main(int argc, char** argv) {
     closedir(d);
     d=NULL;
     for(int i=0; i<lis.pit; i++) {
-      sprintf(apuc, "unzip -u '%s/%s' -d .", kansionimi, lis.p[i]);
-      system(apuc);
-      strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
-      ncid = avaa_netcdf(lis.p[i]);
-      //tarkista_koordinaatit(ncid);
-      lue_muuttuja0(ncid, i_alku);
-      double pa = maarita_laajuus();
       if(maarita_paiva(lis.p[i], &paiv, &vuos)) {
 	printf("Virheellinen tiedostonnimi: \"%s\"\n", tiedostonnimi);
 	exit(1);
       }
-      fprintf(f_ulos, "%6.0lf\t%i\t%i\n", pa, paiv, vuos);
+      sprintf(apuc, "unzip -u '%s/%s' -d %s", kansionimi, lis.p[i], nckansio);
+      system(apuc);
+      strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
+      sprintf(apuc, "%s/%s", nckansio, lis.p[i]);
+      ncid = avaa_netcdf(apuc);
+      //tarkista_koordinaatit(ncid);
+      lue_muuttuja0(ncid, i_alku);
       NCFUNK(nc_close, ncid);
+      double pa = maarita_laajuus();
+      fprintf(f_ulos, "%6.0lf\t%i\t%i\n", pa, paiv, vuos);
       //poista_tiedosto(lis.p[i]);
     }
     for(int i=0; i<lis.pit; i++)
@@ -197,7 +197,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis) {
     sscanf(lis->p[i], "%8d", luvut[0]+i);
   int lasku[256];
   unsigned siirto = 0;
-  for(int j=0; j<4; j++) {
+  for(int j=0; j<4; j++, siirto+=8) {
     memset(lasku, 0, 256*sizeof(int));
     for(int i=0; i<lis->pit; i++)
       lasku[luvut[0][i]>>siirto & 0xff]++;
@@ -207,7 +207,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis) {
       int ind = --lasku[luvut[0][i]>>siirto & 0xff];
       luvut[1][ind] = luvut[0][i];
       if(j%2)
-	lis->p[ind] = apu[ind];
+	lis->p[ind] = apu[i];
       else
 	apu[ind] = lis->p[i];
     }
@@ -222,16 +222,16 @@ void nimet_jarjestuksessa(DIR* d, lista* lis) {
 /*Ei taida kohtuudella onnistua avata nc-tiedostoa, joka on luettu zip-kansiosta RAM-muistiin.
   Täytyy siis ensin purkaa zip-kansio kovalevylle ja sitten lukea tiedosto sieltä
   vaikka sitä kautta lukeminen onkin hitaampaa.*/
-int pura_seuraava(DIR *d, char* polku, char* osanimi) {
+int pura_seuraava(DIR *d, char* polku, char* nimiulos) {
   struct dirent* e;
   while((e = readdir(d))) {
     if(!strstr(e->d_name, ".zip"))
       continue;
-    char kmnt[200];
-    strcpy(osanimi, e->d_name);
-    sprintf(kmnt, "unzip -u '%s/%s' -d .", polku, osanimi);
+    char kmnt[500];
+    sprintf(kmnt, "unzip -u '%s/%s' -d %s", polku, e->d_name, nckansio);
     system(kmnt);
-    strcpy(osanimi+strlen(osanimi)-4, ".nc"); // *.zip --> *.nc
+    strcpy(nimiulos, e->d_name);
+    strcpy(nimiulos+strlen(nimiulos)-4, ".nc"); // *.zip --> *.nc
     return 0; //annettiin unzip-käsky onnistuneesti
   }
   return -1; //kansio loppui
@@ -248,12 +248,14 @@ void poista_tiedosto(const char* nimi) {
 void maarita_i_alut(int* i_alku) {
   int j=0;
   int lukema = 950;
+  //xalku0 = lukema;
   while(lat0[j] < 63.0)
     i_alku[j++] = lukema;
   while(lat0[j] < 64.68)
     i_alku[j++] = ++lukema;
   while(j < ypit0)
     i_alku[j++] = lukema;
+  //xpit1 = xpit0 + lukema-xalku0;
 }
 
 int avaa_netcdf(const char* restrict tnimi) {
