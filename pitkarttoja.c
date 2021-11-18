@@ -9,13 +9,23 @@
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
 const char* const kirjaimet = "ABDK";
-#define N_ULOS 1
+#define N_ULOS 3
+
+#define _MERKKIJONO(jotain) #jotain
+#define MERKKIJONO(jotain) _MERKKIJONO(jotain)
+#ifndef AJONRO
+#define AJONRO 1
+#endif
 
 int main() {
-  char* ulosnimet[] = {"pituus10_X001.bin","pituus50_X001.bin","pituus90_X001.bin"};
+  char ulosnimet[N_ULOS][18];
+  int i=0;
+  strcpy(ulosnimet[i++], "pituus10_X00" MERKKIJONO(AJONRO) ".bin");
+  strcpy(ulosnimet[i++], "pituus50_X00" MERKKIJONO(AJONRO) ".bin");
+  strcpy(ulosnimet[i++], "pituus90_X00" MERKKIJONO(AJONRO) ".bin");
   int aind=0;
  SILMUKKA:
-  sprintf(apuc, "pituudet_%c001.bin", kirjaimet[aind]);
+  sprintf(apuc, "pituudet_%c00%i.bin", kirjaimet[aind], AJONRO);
   FILE* f = fopen(apuc, "rb");
   if(!f) {
     fprintf(stderr, "Ei avattu tiedostoa\n");
