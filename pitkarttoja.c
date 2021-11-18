@@ -9,12 +9,10 @@
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
 const char* const kirjaimet = "ABDK";
+#define N_ULOS 1
 
 int main() {
-  char* ulosnimet[3];
-  ulosnimet[0] = strdup("pituus10_X001.bin");
-  ulosnimet[1] = strdup("pituus50_X001.bin");
-  ulosnimet[2] = strdup("pituus90_X001.bin");
+  char* ulosnimet[] = {"pituus10_X001.bin","pituus50_X001.bin","pituus90_X001.bin"};
   int aind=0;
  SILMUKKA:
   sprintf(apuc, "pituudet_%c001.bin", kirjaimet[aind]);
@@ -24,7 +22,8 @@ int main() {
     return 1;
   }
   int16_t otsake[4];
-  fread(otsake, 2, 4, f);
+  if(fread(otsake, 2, 4, f) != 4)
+    exit(1);
   int xy = otsake[0]*otsake[1];
   int vuosia = otsake[3]-otsake[2];
   short vuodet[vuosia];
@@ -33,7 +32,7 @@ int main() {
 
   /*kuvien alustamiset*/
   FILE* kuvat[3];
-  for(int i=0; i<3; i++) {
+  for(int i=0; i<N_ULOS; i++) {
     ulosnimet[i][strlen("pituusXX_")] = kirjaimet[aind];
     kuvat[i] = fopen(ulosnimet[i], "wb");
     fwrite(otsake, 2, 4, kuvat[i]);
@@ -42,20 +41,19 @@ int main() {
   for(int ruutu=0; ruutu<xy; ruutu++) {
     fseek(f, 8+ruutu*2, SEEK_SET);
     for(int v=0; v<vuosia; v++) {
-      fread(vuodet+v, 1, 2, f);
+      if(fread(vuodet+v, 1, 2, f) != 2)
+	printf("Virhe vuoden %i lukemisessa\n", v);
       fseek(f, (xy-1)*2, SEEK_CUR); //yksi luettiin, joten hilan pituudesta vähennetään yksi
     }
     laskentalajittele(vuodet, vuosia, lvuodet);
-    for(int i=0; i<3; i++)
+    for(int i=0; i<N_ULOS; i++)
       fwrite(lvuodet+kohdat[i], 2, 1, kuvat[i]); //olisiko parempi laittaa taulukkoon ja kirjoittaa tiedosto kerralla?
   }
-  for(int i=0; i<3; i++)
+  for(int i=0; i<N_ULOS; i++)
     fclose(kuvat[i]);
   fclose(f);
   if(kirjaimet[++aind])
     goto SILMUKKA;
-  for(int i=0; i<3; i++)
-    free(ulosnimet[i]);
   return 0;
 }
 
