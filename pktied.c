@@ -44,11 +44,11 @@ int main(int argc, char** argv) {
   int16_t vuosi0, vuosi1;
   for(int aind=0; aind<ajoja; aind++) {
     if(ajot[aind][strlen(ajot[aind])-1] == '1') {
-      vuosi0 = 1975;
+      vuosi0 = 1976;
       vuosi1 = 2006;
     } else {
-      vuosi0 = 2006;
-      vuosi1 = 2027;
+      vuosi0 = 2007;
+      vuosi1 = 2028;
     }
     sprintf(apuc, "pituudet1_%s.bin", ajot[aind]);
     FILE *f = fopen(apuc, "w");
@@ -56,9 +56,9 @@ int main(int argc, char** argv) {
       fprintf(stderr, "Ei avattu ulostuloa\n");
       exit(1);
     }
-    int16_t tmp_pit[] = {xpit, ypit, vuosi0+1, vuosi1};
+    int16_t tmp_pit[] = {xpit, ypit, vuosi0, vuosi1};
     fwrite(tmp_pit, 2, 4, f);
-    int v = vuosi0;
+    int v = vuosi0-1;
     while(1) {
       sprintf(apuc, "%s/%s/%s_%i0101_%i1231_%s", lahdekansio, ajot[aind], nimialku, v, v, nimiloppu);
       printf("\rVuosi %i / %i; ajo %i / %i   ", v-vuosi0+1, vuosi1-vuosi0, aind+1, ajoja);
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
       /*ensimmäisenä vuonna ohitetaan alun lukeminen
 	muina vuosina luetaan alku, asetetaan tulos kaikkiin vuosiin, nollataan, luetaan loppu*/
 #define EHTO(taul,ind) (taul[ind] < 2 && taul[ind] >= KONSRAJA)
-      if(v != vuosi0) {
+      if(v != vuosi0-1) {
 	for(int ind=0; ind<180*xy;)
 	  for(int ruutu=0; ruutu<xy; ruutu++, ind++)
 	    pit_vuosi[ruutu] += EHTO(peitt,ind);

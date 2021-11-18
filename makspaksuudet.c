@@ -21,7 +21,7 @@ typedef struct {
 #define OHUUSRAJA 0.6
 #endif
 #ifndef KASVURAJA
-#define KASVURAJA 30.0
+#define KASVURAJA 20.0
 #endif
 
 maks_t hae_maksimi(float* h, short* d, int pit) {
@@ -59,8 +59,8 @@ char* korvaa_strstr(char* a, const char* restrict b, const char* restrict c) {
   return a;
 }
 
-const char* vanha_tunniste = "tilavuudet_hist_";
-const char* uusi_tunniste = "maksh_hist_";
+const char* vanha_tunniste = "paksuudet_";
+const char* uusi_tunniste = "maksh_";
 
 int main() {
   const char* kansio = "/home/aerkkila/b/tiedokset";
