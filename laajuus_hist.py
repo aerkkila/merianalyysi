@@ -20,6 +20,7 @@ ylabel('Cumulative probability',fontsize=11)
 yticks(fontsize=11)
 xticks(fontsize=11)
 grid('on')
+tight_layout()
 if sys.argv[-1] == '1':
     savefig('%s/laajuudet_hist.png'  %kuvat)
 else:

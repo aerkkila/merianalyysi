@@ -37,7 +37,7 @@ ytikit = np.linspace(0,100000,11)
 ynimet = ["%.i" %luku if not i%2 else '' for i,luku in enumerate(ytikit)]
 p_aikaikk = np.arange(1,args.aikaikk+1) / (args.aikaikk+1)
 for aind in range(len(ajot)):
-    tiedos = np.loadtxt('%s/makslaajuudet_%s.txt'\
+    tiedos = np.loadtxt('%s/makslaajuudet0_%s.txt'\
                       %(kansio, ajot[aind]), usecols=[0,2])
     v0 = tiedos[0,1]
     pituus = len(tiedos)-args.aikaikk+1
@@ -80,7 +80,7 @@ for aind in range(len(ajot)):
 
 #suptitle(ulaotsikko)
 tight_layout(h_pad=1)
-if sys.argv[-1] == '1':
-    savefig("%s/pa%s_aikasarja_toistaik.png" %(kuvat, args.aikaikk))
+if args.tallenna:
+    savefig("%s/laaj0_%s_aikasarja_suoraan.png" %(kuvat, args.aikaikk))
 else:
     show()
