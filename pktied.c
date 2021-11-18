@@ -3,6 +3,7 @@
 #include <netcdf.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdint.h>
 
 const char* lahdekansio = "/scratch/project_2002540/siiriasi/smartsea_data";
 const char* nimialku = "NORDIC-GOB_1d";
@@ -11,13 +12,13 @@ const char* nimiloppu = "grid_T.nc";
 #define NCFUNK(funk, ...) {if((ncpalaute = funk(__VA_ARGS__)))	\
       printf("Virhe: %s\n", nc_strerror(ncpalaute));}
 
-const char* const ajot[] = {"A001", "B001", "D001"};
+//const char* const ajot[] = {"A001", "B001", "D001"};
+const char* const ajot[] = {"A002", "B002", "D002", "A005", "B005", "D005"};
 #ifndef KONSRAJA
 #define KONSRAJA 0.1
 #endif
 
 int main(int argc, char** argv) {
-  fflush(stdout);
   int ncid, ncpalaute, id;
   size_t xpit, ypit, xy;
   char* apuc = malloc(1000);
@@ -47,9 +48,9 @@ int main(int argc, char** argv) {
       vuosi1 = 2006;
     } else {
       vuosi0 = 2006;
-      vuosi1 = 2100;
+      vuosi1 = 2027;
     }
-    sprintf(apuc, "pituudet_%s.bin", ajot[aind]);
+    sprintf(apuc, "pituudet1_%s.bin", ajot[aind]);
     FILE *f = fopen(apuc, "w");
     if(!f) {
       fprintf(stderr, "Ei avattu ulostuloa\n");
