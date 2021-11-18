@@ -12,7 +12,7 @@ const float latraja  = 60.2;
 #ifndef KONSRAJA
 #define KONSRAJA 1.0 //prosentteina
 #endif
-#define NCVIRHE(arg) do {printf("Netcdf-virhe: %s\n", nc_strerror(arg)); exit(1);} while(0)
+#define NCVIRHE(arg) printf("Netcdf-virhe: %s\n", nc_strerror(arg))
 #define NCFUNK(fun, ...)			\
   do {						\
     if((ncpalaute = fun(__VA_ARGS__)))		\
@@ -38,24 +38,24 @@ float *lat, *lon, *lat0;
 double *var, *alat;
 FILE* f_ulos;
 
-DIR* avaa_vuosi(int vuosi, char* polku_ulos);
-int pura_seuraava(DIR *d, char* polku, char* osanimi);
-void poista_tiedosto(const char* nimi);
-int avaa_netcdf(const char* restrict);
-void lue_koordinaatit1(int ncid);
-void maarita_i_alut(int* i_alku);
-void lue_muuttuja0(int ncid, int* i_alku);
-void laske_pintaalat(int* i_alku);
+DIR*   avaa_vuosi(int vuosi, char* polku_ulos);
+int    pura_seuraava(DIR *d, char* polku, char* osanimi);
+void   poista_tiedosto(const char* nimi);
+int    avaa_netcdf(const char* restrict);
+void   lue_koordinaatit1(int ncid);
+void   maarita_i_alut(int* i_alku);
+int    lue_muuttuja0(int ncid, int* i_alku);
+void   laske_pintaalat(int* i_alku);
 double maarita_laajuus();
-int maarita_paiva(const char* restrict nimi, int* paiva, int* vuosi);
-void nimet_jarjestuksessa(DIR* d, lista* lis);
+int    maarita_paiva(const char* restrict nimi, int* paiva, int* vuosi);
+void   nimet_jarjestuksessa(DIR* d, lista* lis);
 
 /*Tarvittavat koot ovat
   xypit2: koko kartan koko
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300];
-  int vuosi0=1980, vuosi1=2007;
+  int vuosi0=1981, vuosi1=2007;
   size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
@@ -98,13 +98,13 @@ int main(int argc, char** argv) {
   lis.p = malloc(20*sizeof(char*));
   int16_t* pit_vuosi = malloc(xypit0*2); //vino kartta
   int16_t* kartta = calloc(xpit1*ypit0, 2); //oikaistu kartta
-  FILE* f_ulos = fopen("pituudet_K001.bin", "wb");
-  int16_t tmp_pit[] = {xpit1, ypit0, vuosi0+1, vuosi1}; //korjataan lopussa, jos viimeinen vuosi oli väärin
+  FILE* f_ulos = fopen("pituudet1_K001.bin", "wb");
+  int16_t tmp_pit[] = {xpit1, ypit0, vuosi0, vuosi1}; //korjataan lopussa, jos viimeinen vuosi oli väärin
   fwrite(tmp_pit, 2, 4, f_ulos);
-  FILE *fpaivia = fopen("paivia.txt", "w");
+  FILE *fpaivia = fopen("päiviä1.txt", "w");
 
-  int paiv, vuos, vanha_paiv, vanha_vuos, vuosi, paivia;
-  for(vuosi=vuosi0; vuosi<vuosi1; vuosi++) {
+  int paiv, vuos=-1, vanha_paiv, vanha_vuos=-1, vuosi, paivia;
+  for(vuosi=vuosi0-1; vuosi<vuosi1; vuosi++) {
     d = avaa_vuosi(vuosi, kansionimi);
     if(!d)
       break;
@@ -118,27 +118,52 @@ int main(int argc, char** argv) {
 	exit(1);
       }
       if(vuos != vanha_vuos) {
+	if(vuos < vuosi0)
+	  continue;
 	vanha_paiv = paiv;
 	vanha_vuos = vuos;
 	continue;
       }
       paivia = paiv - vanha_paiv;
+      if(paivia < 2) //nopeutetaan asettamalla alaraja päivävälille
+	continue;
+      if(!strcmp(lis.p[i]+strlen(lis.p[i])-4, ".zip")) {
+	sprintf(apuc, "unzip -qu '%s/%s' -d %s", kansionimi, lis.p[i], nckansio);
+	if(system(apuc)) {
+	  printf("Ohitetaan komento \"%s\"\n", apuc);
+	  continue;
+	} else
+	  puts(apuc);
+	strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
+	sprintf(apuc, "%s/%s", nckansio, lis.p[i]);
+      } else { //nc.gz
+	sprintf(apuc, "gunzip -kf '%s/%s'", kansionimi, lis.p[i]);
+	if(system(apuc)) {
+	  printf("Ohitetaan komento \"%s\"\n", apuc);
+	  continue;
+	}
+	else
+	  puts(apuc);
+	lis.p[i][strlen(lis.p[i])-3] = '\0'; // .nc.gz --> .nc
+	sprintf(apuc, "%s/%s", kansionimi, lis.p[i]);
+      }
+      ncid = avaa_netcdf(apuc);
+      if(lue_muuttuja0(ncid, i_alku)) {
+	puts("Tämä virhe ei haittaa");
+	continue;
+      }
       vanha_paiv = paiv;
       vanha_vuos = vuos;
-      sprintf(apuc, "unzip -u '%s/%s' -d %s/netcdf", kansionimi, lis.p[i], lahdekansio);
-      system(apuc);
-      strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
-      sprintf(apuc, "%s/%s", nckansio, lis.p[i]);
-      ncid = avaa_netcdf(apuc);
-      //tarkista_koordinaatit(ncid);
-      lue_muuttuja0(ncid, i_alku);
       NCFUNK(nc_close, ncid);
+#ifdef DEBUG
       if(paivia < 0)
 	asm("int $3");
+#endif
       fprintf(fpaivia, "%i\t%i: %i\n", paivia, vuos, paiv);
       for(int xy=0; xy<xypit0; xy++)
 	pit_vuosi[xy] += (var[xy]>=KONSRAJA && var[xy]<1000 ) * paivia;
-      //poista_tiedosto(lis.p[i]);
+      if(vuos >= 2007)
+	poista_tiedosto(apuc);
     }
 #ifdef DEBUG
     for(int xy=0; xy<xypit0; xy++)
@@ -214,7 +239,7 @@ DIR* avaa_vuosi(int vuosi, char* polku) {
 void nimet_jarjestuksessa(DIR* d, lista* lis) {
   struct dirent* e;
   while((e = readdir(d))) {
-    if(!strstr(e->d_name, "_icechart.zip"))
+    if(!strstr(e->d_name, "_icechart.zip") && !strstr(e->d_name, "_icechart.nc.gz"))
       continue;
     listalle(lis, strdup(e->d_name));
   }
@@ -257,8 +282,9 @@ int pura_seuraava(DIR *d, char* polku, char* nimiulos) {
     if(!strstr(e->d_name, ".zip"))
       continue;
     char kmnt[500];
-    sprintf(kmnt, "unzip -u '%s/%s' -d %s/netcdf", polku, e->d_name, lahdekansio);
-    system(kmnt);
+    sprintf(kmnt, "unzip -u '%s/%s' -d %s", polku, e->d_name, nckansio);
+    if(system(kmnt))
+      printf("Virhe komennolla \"%s\"\n", kmnt);
     strcpy(nimiulos, e->d_name);
     strcpy(nimiulos+strlen(nimiulos)-4, ".nc"); // *.zip --> *.nc
     return 0; //annettiin unzip-käsky onnistuneesti
@@ -269,7 +295,10 @@ int pura_seuraava(DIR *d, char* polku, char* nimiulos) {
 void poista_tiedosto(const char* nimi) {
   char kmnt[200];
   sprintf(kmnt, "rm '%s'", nimi);
-  system(kmnt);
+  int a;
+  if((a =system(kmnt)))
+    printf("Poistamisen palautustila oli %i\n"
+	   "Komento: \"%s\"\n", a, kmnt);
 }
 
 /*alueesta luetaan aina xpit0:n pituinen pätkä y:n mukaan vaihtelevasta alkukohdasta
@@ -304,20 +333,22 @@ int avaa_netcdf(const char* restrict tnimi) {
 
 void lue_koordinaatit1(int ncid) {
   int id;
-  //size_t alku[] = {0, yalku1};
   NCFUNK(nc_inq_varid, ncid, "lat", &id);
   NCFUNK(nc_get_var, ncid, id, lat);
   NCFUNK(nc_inq_varid, ncid, "lon", &id);
   NCFUNK(nc_get_var, ncid, id, lon);
 }
 
-void lue_muuttuja0(int ncid, int* i_alku) {
+int lue_muuttuja0(int ncid, int* i_alku) {
   int id;
   NCFUNK(nc_inq_varid, ncid, "kFmiIceConcentration", &id);
+  if(ncpalaute)
+    return ncpalaute;
   size_t alku[3] = { [0] = 0, [1] = yalku0-1 };
   for(int j=0; j<ypit0; j++) {
     alku[2] = i_alku[j];
     alku[1]++;
     NCFUNK(nc_get_vara, ncid, id, alku, countpt0, var+j*xpit0);
   }
+  return 0;
 }
