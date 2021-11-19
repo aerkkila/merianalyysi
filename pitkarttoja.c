@@ -8,7 +8,7 @@
 
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
-const char* const kirjaimet = "ABDK";
+const char* const kirjaimet = "ABD";
 #define N_ULOS 3
 
 #define _MERKKIJONO(jotain) #jotain
@@ -25,7 +25,7 @@ int main() {
   strcpy(ulosnimet[i++], "pituus90_X00" MERKKIJONO(AJONRO) ".bin");
   int aind=0;
  SILMUKKA:
-  sprintf(apuc, "pituudet_%c00%i.bin", kirjaimet[aind], AJONRO);
+  sprintf(apuc, "pituudet1_%c00%i.bin", kirjaimet[aind], AJONRO);
   FILE* f = fopen(apuc, "rb");
   if(!f) {
     fprintf(stderr, "Ei avattu tiedostoa\n");
@@ -36,6 +36,15 @@ int main() {
     exit(1);
   int xy = otsake[0]*otsake[1];
   int vuosia = otsake[3]-otsake[2];
+  int alku = 0;
+  /*Tätä pitää muuttaa tilanteen mukaan*/
+  /*–––––––––––––––––––––––––––––––––––*/
+  vuosia = 46;
+  int vuosi0 = 2052;
+  alku = vuosi0-otsake[2];
+  otsake[2] = vuosi0;
+  otsake[3] = otsake[2]+vuosia;
+  /*–––––––––––––––––––––––––––––––––––*/
   short vuodet[vuosia];
   short lvuodet[vuosia];
   int kohdat[] = {(int)round((vuosia+1)*0.1)-1, (int)round((vuosia+1)*0.5)-1, (int)round((vuosia+1)*0.9)-1};
@@ -49,9 +58,9 @@ int main() {
   }
 
   for(int ruutu=0; ruutu<xy; ruutu++) {
-    fseek(f, 8+ruutu*2, SEEK_SET);
+    fseek(f, 8+ruutu*2+alku*xy*2, SEEK_SET);
     for(int v=0; v<vuosia; v++) {
-      if(fread(vuodet+v, 1, 2, f) != 2)
+      if(fread(vuodet+v, 2, 1, f) != 1)
 	printf("Virhe vuoden %i lukemisessa\n", v);
       fseek(f, (xy-1)*2, SEEK_CUR); //yksi luettiin, joten hilan pituudesta vähennetään yksi
     }
