@@ -8,15 +8,15 @@ import sys
 from jaettu import *
 
 def kautto():
-    printf("Käyttö: ./tämä alkuvuosi loppuvuosi(otetaan mukaan) laji(g/w) (1, jos tallenna)")
+    print("Käyttö: ./tämä alkuvuosi loppuvuosi(otetaan mukaan) laji(g/w) (1, jos tallenna)")
     exit()
 
 if suomeksi:
     xnimi = "toistumisaika (vuotta)"
     ynimi = "pinta-ala $(km^2)$"
 else:
-    xnimi = 'time interval (years)'
-    ynimi = 'area $(km^2)$'
+    xnimi = 'Time interval (years)'
+    ynimi = 'Extent $(\mathrm{km}^2)$'
 try:
     vuosi0 = int(sys.argv[1])
     vuosi1 = int(sys.argv[2])
@@ -83,11 +83,13 @@ suptitle('%i–%i' %(vuosi0, vuosi1))
 tight_layout(h_pad=1)
 
 figure(2)
-title('%i–%i' %(vuosi0, vuosi1))
-xlabel(xnimi, fontsize=11)
-ylabel(ynimi)
+#title('%i–%i' %(vuosi0, vuosi1))
+xlabel(xnimi, fontsize=14)
+ylabel(ynimi, fontsize=14)
+xticks(fontsize=14)
+yticks(fontsize=14)
+legend(fontsize=13)
 tight_layout()
-legend()
 ylim(top=105000)
 if sys.argv[-1] == '1':
     figure(2)
