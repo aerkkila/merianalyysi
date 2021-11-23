@@ -45,8 +45,8 @@ int main() {
   int alku = 0;
   /*Tätä pitää muuttaa tilanteen mukaan*/
   /*–––––––––––––––––––––––––––––––––––*/
-  vuosia = otsake[3]-otsake[2];
-  int vuosi0 = otsake[2];
+  int vuosi0 = 2052;
+  vuosia = otsake[3]-vuosi0;
   alku = vuosi0-otsake[2];
   otsake[2] = vuosi0;
   otsake[3] = otsake[2]+vuosia;
@@ -86,7 +86,7 @@ int main() {
 inline void __attribute__((always_inline)) laskentalajittele(short* a, int pit, short* ulos) {
   for(int i=0; i<pit; i++) {
 #ifdef DEBUG
-    if(a[i] > 350 || a[i] < 0)
+    if(a[i] > 350 || a[i] < PIENIN_ARVO)
       asm("int $3");
 #endif
     kpl1[a[i]]++;
