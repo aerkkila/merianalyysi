@@ -7,7 +7,7 @@ from matplotlib.cm import get_cmap
 import numpy as np
 
 #ensin tehdään kartat kaikista vuosista ohjelmilla pktied.c ja pitkart_kartoista.c
-#näistä 10 50 90 prosenttiosuus ohjelmalla pitkarttoja.c
+#näistä 10 50 90 prosenttiosuus ohjelmalla xkarttoja.c
 #sitten käytetään tätä
 
 #värikartta halutaan epäjatkuvana

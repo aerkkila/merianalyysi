@@ -8,7 +8,7 @@ import numpy as np
 import sys
 
 #ensin tehdään kartat kaikista vuosista ohjelmilla pktied.c ja pitkart_kartoista.c
-#näistä 10 50 90 prosenttiosuus ohjelmalla pitkarttoja.c
+#näistä 10 50 90 prosenttiosuus ohjelmalla xkarttoja.c
 #sitten käytetään tätä
 
 if len(sys.argv) < 2 or sys.argv[1] not in ('10','90'):

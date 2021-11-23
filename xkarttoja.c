@@ -8,8 +8,12 @@
 
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
+int *kpl, *kpl1;
 const char* const kirjaimet = "ABD";
 #define N_ULOS 3
+#define PIENIN_ARVO -92
+#define ULOSNIMI "ensijää"
+#define SISNIMI "ensijäätyminen1"
 
 #define _MERKKIJONO(jotain) #jotain
 #define MERKKIJONO(jotain) _MERKKIJONO(jotain)
@@ -18,14 +22,16 @@ const char* const kirjaimet = "ABD";
 #endif
 
 int main() {
-  char ulosnimet[N_ULOS][18];
   int i=0;
-  strcpy(ulosnimet[i++], "pituus10_X00" MERKKIJONO(AJONRO) ".bin");
-  strcpy(ulosnimet[i++], "pituus50_X00" MERKKIJONO(AJONRO) ".bin");
-  strcpy(ulosnimet[i++], "pituus90_X00" MERKKIJONO(AJONRO) ".bin");
+  kpl = calloc(367,sizeof(int));
+  kpl1 = kpl-PIENIN_ARVO;
+  char ulosnimet[N_ULOS][21];
+  strcpy(ulosnimet[i++], ULOSNIMI "10_X00" MERKKIJONO(AJONRO) ".bin");
+  strcpy(ulosnimet[i++], ULOSNIMI "50_X00" MERKKIJONO(AJONRO) ".bin");
+  strcpy(ulosnimet[i++], ULOSNIMI "90_X00" MERKKIJONO(AJONRO) ".bin");
   int aind=0;
  SILMUKKA:
-  sprintf(apuc, "pituudet1_%c00%i.bin", kirjaimet[aind], AJONRO);
+  sprintf(apuc, SISNIMI "_%c00%i.bin", kirjaimet[aind], AJONRO);
   FILE* f = fopen(apuc, "rb");
   if(!f) {
     fprintf(stderr, "Ei avattu tiedostoa\n");
@@ -39,8 +45,8 @@ int main() {
   int alku = 0;
   /*Tätä pitää muuttaa tilanteen mukaan*/
   /*–––––––––––––––––––––––––––––––––––*/
-  vuosia = 46;
-  int vuosi0 = 2052;
+  vuosia = otsake[3]-otsake[2];
+  int vuosi0 = otsake[2];
   alku = vuosi0-otsake[2];
   otsake[2] = vuosi0;
   otsake[3] = otsake[2]+vuosia;
@@ -52,7 +58,7 @@ int main() {
   /*kuvien alustamiset*/
   FILE* kuvat[3];
   for(int i=0; i<N_ULOS; i++) {
-    ulosnimet[i][strlen("pituusXX_")] = kirjaimet[aind];
+    ulosnimet[i][strlen(ULOSNIMI)+3] = kirjaimet[aind];
     kuvat[i] = fopen(ulosnimet[i], "wb");
     fwrite(otsake, 2, 4, kuvat[i]);
   }
@@ -73,21 +79,21 @@ int main() {
   fclose(f);
   if(kirjaimet[++aind])
     goto SILMUKKA;
+  free(kpl);
   return 0;
 }
 
-int pitdet[367] = {0};
 inline void __attribute__((always_inline)) laskentalajittele(short* a, int pit, short* ulos) {
   for(int i=0; i<pit; i++) {
 #ifdef DEBUG
-    if(i > 350 || i < 0)
+    if(a[i] > 350 || a[i] < 0)
       asm("int $3");
 #endif
-    pitdet[a[i]]++;
+    kpl1[a[i]]++;
   }
   int uind = 0;
-  for(int i=0; uind<pit; i++) //lopettaa kun kaikki on löytynyt, mikä on ennen kuin i==imax
-    for(int m=0; m<pitdet[i]; m++)
+  for(int i=PIENIN_ARVO; uind<pit; i++) //lopettaa kun kaikki on löytynyt, mikä on ennen kuin i==imax
+    for(int m=0; m<kpl1[i]; m++)
       ulos[uind++] = i;
-  memset(pitdet, 0, 367*sizeof(int));
+  memset(kpl, 0, 367*sizeof(int));
 }
