@@ -13,7 +13,7 @@ if suomeksi:
     ynimi = 'Todennäköisyyskertymä'
 else:
     xnimi = 'Maximum thickness (cm)'
-    ynimi = 'Cumulative probability'
+    ynimi = 'Probability'
 
 pars = argparse.ArgumentParser()
 pars.add_argument('-v0', '--vuosi0', type=int, default=2052,
@@ -77,7 +77,7 @@ if len(ar.lajit) > 3 and ar.lajit[-4:] == '.txt':
     if(len(ar.lajit) != len(ajot)*len(paikat)):
         print("Varoitus, luettiin %i lajia %i:n sijaan" %(len(ar.lajit), len(ajot)*len(paikat)))
 
-F = np.array(range(1,ar.vuosi1-ar.vuosi0+2)) / (ar.vuosi1-ar.vuosi0+2.0) #kertymäfunktio
+F = 1 - np.array(range(1,ar.vuosi1-ar.vuosi0+2)) / (ar.vuosi1-ar.vuosi0+2.0)
 
 ytikit = np.linspace(0,1,11)
 locale.setlocale(locale.LC_ALL, paikallisuus)
