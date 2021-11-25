@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
       vuosi1 = 2006;
     } else {
       vuosi0 = 2007;
-      vuosi1 = 2028;
+      vuosi1 = 2100;
     }
     sprintf(apuc, "pituudet1_%s.bin", ajot[aind]);
     FILE *f = fopen(apuc, "w");
