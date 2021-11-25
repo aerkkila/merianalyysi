@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-const char* lahdekansio = "/scratch/project_2002540/siiriasi/smartsea_data";
+const char* lahdekansio = "/mnt/smartsea_data";
 const char* nimialku = "NORDIC-GOB_1d";
 const char* nimiloppu = "grid_T.nc";
 char* apuc;
@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
   NCFUNK(nc_inq_dimid, ncid, "y", &id);
   NCFUNK(nc_inq_dimlen, ncid, id, &ypit);
   size_t xy=xpit*ypit;
+  const size_t countpt[] = {1,ypit,xpit};
+  size_t alku[3] = {0};
 
   /*nämä ovat liian suuria mahtuakseen pinomuistiin*/
   float *lat, *lon, *kons;
@@ -64,7 +66,7 @@ int main(int argc, char** argv) {
 #define PINTAALA(lat1, lat2, lon1, lon2) (((lon2)-(lon1))*r2*(sinf(lat2)-sinf(lat1))*1.0e-6)
 #define RAD(a) ((a)*0.017453293)
   double* alat = malloc(xy*sizeof(double));
-  FILE *f = fopen("hilan_pintaalat.txt", "w");
+  //FILE *f = fopen("hilan_pintaalat.txt", "w");
   for(int j=0; j<ypit-1; j++)
     for(int i=0; i<xpit-1; i++) {
       float lat1=lat[j*xpit+i], lat2=lat[(j+1)*xpit+i], lon1=lon[j*xpit+i], lon2=lon[j*xpit+i+1];
@@ -73,13 +75,13 @@ int main(int argc, char** argv) {
       else
 	alat[j*xpit+i] = ((latraja<lat[j*xpit+i]) *	\
 			  PINTAALA(RAD(lat1), RAD(lat2), RAD(lon1), RAD(lon2)));
-      fprintf(f, "%.5lf\t%i\t%i\t%.3f\t%.3f\t%.3f\t%.3f\n", alat[j*xpit+i], j, i, lat[j*xpit+i], lat[(j+1)*xpit+i], lon[j*xpit+i], lon[j*xpit+i+1]);
+      //fprintf(f, "%.5lf\t%i\t%i\t%.3f\t%.3f\t%.3f\t%.3f\n", alat[j*xpit+i], j, i, lat[j*xpit+i], lat[(j+1)*xpit+i], lon[j*xpit+i], lon[j*xpit+i+1]);
     }
-  fclose(f);
+  //fclose(f);
 
   free(lat); free(lon);
   lat=NULL; lon=NULL;
-  kons = malloc(366*xy*sizeof(float));
+  kons = malloc(xy*sizeof(float));
 
   for(int ajoind=1; ajoind<argc; ajoind++) {
     if(argv[ajoind][strlen(argv[ajoind])-1] == '1') {
@@ -104,13 +106,14 @@ int main(int argc, char** argv) {
       //fflush(stdout);
       NCFUNK(nc_open, apuc, NC_NOWRITE, &ncid);
       NCFUNK(nc_inq_varid, ncid, "soicecov", &id);
-      NCFUNK(nc_get_var, ncid, id, kons);
       int vuoden_pit = 365 + !(vuosi%4);
       for(int paiva=0; paiva<vuoden_pit; paiva++) {
 	double pa=0;
+	alku[0] = paiva;
+	NCFUNK(nc_get_vara, ncid, id, alku, countpt, kons);
 	for(int j=0; j<ypit-1; j++)
 	  for(int i=0; i<xpit-1; i++)
-	    pa += (kons[paiva*xy+j*xpit+i]>=KONSRAJA) * alat[j*xpit+i];
+	    pa += (kons[j*xpit+i]>=KONSRAJA) * alat[j*xpit+i];
 	int paiva1 = (paiva+122) % vuoden_pit - 122;
 	if(vuosi+(paiva1<0) >= vuosi1)
 	  goto ULOS;
