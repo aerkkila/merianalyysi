@@ -55,7 +55,7 @@ void   nimet_jarjestuksessa(DIR* d, lista* lis);
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300];
-  int vuosi0=1981, vuosi1=2007;
+  int vuosi0=1991, vuosi1=2021;
   size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
@@ -70,12 +70,12 @@ int main(int argc, char** argv) {
   lon = malloc(xpit2*sizeof(float));
 
   char kansionimi[80];
-  DIR* d = avaa_vuosi(1980, kansionimi);
+  DIR* d = avaa_vuosi(1991, kansionimi);
   strcpy(apuc, kansionimi);
   char tiedostonnimi[120];
   strcpy(tiedostonnimi, nckansio);
   if(pura_seuraava(d, apuc, tiedostonnimi+strlen(tiedostonnimi))) {
-    printf("Ei purettu yhtään vuodesta 1980\n");
+    printf("Ei purettu yhtään vuodesta 1991\n");
     exit(1);
   }
   int ncid = avaa_netcdf(tiedostonnimi);
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
   FILE *fpaivia = fopen("päiviä1.txt", "w");
 
   int paiv, vuos=-1, vanha_paiv, vanha_vuos=-1, vuosi, paivia;
-  for(vuosi=vuosi0-1; vuosi<vuosi1; vuosi++) {
+  for(vuosi=vuosi0-1; ; vuosi++) {
     d = avaa_vuosi(vuosi, kansionimi);
     if(!d)
       break;
@@ -120,13 +120,15 @@ int main(int argc, char** argv) {
       if(vuos != vanha_vuos) {
 	if(vuos < vuosi0)
 	  continue;
+	if(vuos >= vuosi1)
+	  goto ULOS;
 	vanha_paiv = paiv;
 	vanha_vuos = vuos;
 	continue;
       }
       paivia = paiv - vanha_paiv;
-      if(paivia < 2) //nopeutetaan asettamalla alaraja päivävälille
-	continue;
+      //if(paivia < 2) //nopeutetaan asettamalla alaraja päivävälille
+	  //continue;
       if(!strcmp(lis.p[i]+strlen(lis.p[i])-4, ".zip")) {
 	sprintf(apuc, "unzip -qu '%s/%s' -d %s", kansionimi, lis.p[i], nckansio);
 	if(system(apuc)) {
@@ -162,7 +164,7 @@ int main(int argc, char** argv) {
       fprintf(fpaivia, "%i\t%i: %i\n", paivia, vuos, paiv);
       for(int xy=0; xy<xypit0; xy++)
 	pit_vuosi[xy] += (var[xy]>=KONSRAJA && var[xy]<1000 ) * paivia;
-      if(vuos >= 2007)
+      if(vuos >= 2009)
 	poista_tiedosto(apuc);
     }
 #ifdef DEBUG
@@ -180,6 +182,7 @@ int main(int argc, char** argv) {
       free(lis.p[i]);
     lis.pit=0;
   }
+ ULOS:
   fclose(fpaivia);
   if(d)
     closedir(d);
@@ -296,7 +299,7 @@ void poista_tiedosto(const char* nimi) {
   char kmnt[200];
   sprintf(kmnt, "rm '%s'", nimi);
   int a;
-  if((a =system(kmnt)))
+  if((a=system(kmnt)))
     printf("Poistamisen palautustila oli %i\n"
 	   "Komento: \"%s\"\n", a, kmnt);
 }

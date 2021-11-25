@@ -14,7 +14,7 @@ const float latraja  = 60.2;
 #ifndef KONSRAJA
 #define KONSRAJA 1.0 //prosentteina
 #endif
-#define NCVIRHE(arg) do {printf("Netcdf-virhe: %s\n", nc_strerror(arg)); exit(1);} while(0)
+#define NCVIRHE(arg) printf("Netcdf-virhe: %s\n", nc_strerror(arg))
 #define NCFUNK(fun, ...)			\
   do {						\
     if((ncpalaute = fun(__VA_ARGS__)))		\
@@ -45,7 +45,7 @@ void poista_tiedosto(const char* nimi);
 int avaa_netcdf(const char* restrict);
 void lue_koordinaatit1(int ncid);
 void maarita_i_alut(int* i_alku);
-void lue_muuttuja0(int ncid, int* i_alku);
+int lue_muuttuja0(int ncid, int* i_alku);
 void laske_pintaalat(int* i_alku);
 double maarita_laajuus();
 int maarita_paiva(const char* restrict nimi, int* paiva, int* vuosi);
@@ -56,7 +56,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis);
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300];
-  int vuosi0=1980, vuosi1=2007;
+  int vuosi0=2017, vuosi1=2021;
   size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
@@ -71,12 +71,12 @@ int main(int argc, char** argv) {
   lon = malloc(xpit2*sizeof(float));
 
   char kansionimi[80];
-  DIR* d = avaa_vuosi(1980, kansionimi);
+  DIR* d = avaa_vuosi(vuosi0, kansionimi);
   strcpy(apuc, kansionimi);
   char tiedostonnimi[120];
   strcpy(tiedostonnimi, nckansio);
   if(pura_seuraava(d, apuc, tiedostonnimi+strlen(tiedostonnimi))) {
-    printf("Ei purettu yhtään vuodesta 1980\n");
+    printf("Ei purettu yhtään vuodesta %i\n", vuosi0);
     exit(1);
   }
   int ncid = avaa_netcdf(tiedostonnimi);
@@ -98,10 +98,10 @@ int main(int argc, char** argv) {
   closedir(d);
   lista lis = {.patka=20, .tilaa=20, .pit=0, .p=NULL};
   lis.p = malloc(20*sizeof(char*));
-  FILE* f_ulos = fopen("laajuudet_K001.txt", "w");
+  FILE* f_ulos = fopen("laajuudet_K001.txt", "a");
 
   int paiv, vuos;
-  for(int vuosi=vuosi0; vuosi<vuosi1; vuosi++) {
+  for(int vuosi=vuosi0-1; ; vuosi++) {
     d = avaa_vuosi(vuosi, kansionimi);
     if(!d)
       break;
@@ -113,22 +113,47 @@ int main(int argc, char** argv) {
 	printf("Virheellinen tiedostonnimi: \"%s\"\n", tiedostonnimi);
 	exit(1);
       }
-      sprintf(apuc, "unzip -u '%s/%s' -d %s", kansionimi, lis.p[i], nckansio);
-      system(apuc);
-      strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
-      sprintf(apuc, "%s/%s", nckansio, lis.p[i]);
+      if(vuos < vuosi0)
+	continue;
+      if(vuos >= vuosi1)
+	goto ULOS;
+      if(!strcmp(lis.p[i]+strlen(lis.p[i])-4, ".zip")) {
+	sprintf(apuc, "unzip -qu '%s/%s' -d %s", kansionimi, lis.p[i], nckansio);
+	if(system(apuc)) {
+	  printf("Ohitetaan komento \"%s\"\n", apuc);
+	  continue;
+	}
+	puts(apuc);
+	strcpy(lis.p[i]+strlen(lis.p[i])-4, ".nc"); // .zip --> .nc
+	sprintf(apuc, "%s/%s", nckansio, lis.p[i]);
+      } else { //nc.gz
+	sprintf(apuc, "gunzip -kf '%s/%s'", kansionimi, lis.p[i]);
+	if(system(apuc)) {
+	  printf("Ohitetaan komento \"%s\"\n", apuc);
+	  continue;
+	}
+	puts(apuc);
+	lis.p[i][strlen(lis.p[i])-3] = '\0'; // .nc.gz --> .nc
+	sprintf(apuc, "%s/%s", kansionimi, lis.p[i]);
+      }
       ncid = avaa_netcdf(apuc);
-      //tarkista_koordinaatit(ncid);
-      lue_muuttuja0(ncid, i_alku);
+      if(lue_muuttuja0(ncid, i_alku)) {
+	puts("Tämä virhe ei haittaa");
+	if(vuos >= 2009)
+	  poista_tiedosto(apuc);
+	continue;
+      }
       NCFUNK(nc_close, ncid);
       double pa = maarita_laajuus();
       fprintf(f_ulos, "%6.0lf\t%i\t%i\n", pa, paiv, vuos);
-      //poista_tiedosto(lis.p[i]);
+      if(vuos >= 2009)
+	poista_tiedosto(apuc);
     }
     for(int i=0; i<lis.pit; i++)
       free(lis.p[i]);
     lis.pit=0;
   }
+ ULOS:
   if(d)
     closedir(d);
   free(lat); free(lon); free(var); free(alat);
@@ -185,7 +210,7 @@ DIR* avaa_vuosi(int vuosi, char* polku) {
 void nimet_jarjestuksessa(DIR* d, lista* lis) {
   struct dirent* e;
   while((e = readdir(d))) {
-    if(!strstr(e->d_name, "_icechart.zip"))
+    if(!strstr(e->d_name, "_icechart.zip") && !strstr(e->d_name, "_icechart.nc.gz"))
       continue;
     listalle(lis, strdup(e->d_name));
   }
@@ -229,7 +254,8 @@ int pura_seuraava(DIR *d, char* polku, char* nimiulos) {
       continue;
     char kmnt[500];
     sprintf(kmnt, "unzip -u '%s/%s' -d %s", polku, e->d_name, nckansio);
-    system(kmnt);
+    if(system(kmnt))
+      printf("Virhe komennolla \"%s\"\n", kmnt);
     strcpy(nimiulos, e->d_name);
     strcpy(nimiulos+strlen(nimiulos)-4, ".nc"); // *.zip --> *.nc
     return 0; //annettiin unzip-käsky onnistuneesti
@@ -240,7 +266,10 @@ int pura_seuraava(DIR *d, char* polku, char* nimiulos) {
 void poista_tiedosto(const char* nimi) {
   char kmnt[200];
   sprintf(kmnt, "rm '%s'", nimi);
-  system(kmnt);
+  int a;
+  if((a=system(kmnt)))
+    printf("Poistamisen palautustila oli %i\n"
+	   "Komento: \"%s\"\n", a, kmnt);
 }
 
 /*alueesta luetaan aina xpit0:n pituinen pätkä y:n mukaan vaihtelevasta alkukohdasta
@@ -248,14 +277,12 @@ void poista_tiedosto(const char* nimi) {
 void maarita_i_alut(int* i_alku) {
   int j=0;
   int lukema = 950;
-  //xalku0 = lukema;
   while(lat0[j] < 63.0)
     i_alku[j++] = lukema;
   while(lat0[j] < 64.68)
     i_alku[j++] = ++lukema;
   while(j < ypit0)
     i_alku[j++] = lukema;
-  //xpit1 = xpit0 + lukema-xalku0;
 }
 
 int avaa_netcdf(const char* restrict tnimi) {
@@ -275,22 +302,24 @@ int avaa_netcdf(const char* restrict tnimi) {
 
 void lue_koordinaatit1(int ncid) {
   int id;
-  //size_t alku[] = {0, yalku1};
   NCFUNK(nc_inq_varid, ncid, "lat", &id);
   NCFUNK(nc_get_var, ncid, id, lat);
   NCFUNK(nc_inq_varid, ncid, "lon", &id);
   NCFUNK(nc_get_var, ncid, id, lon);
 }
 
-void lue_muuttuja0(int ncid, int* i_alku) {
+int lue_muuttuja0(int ncid, int* i_alku) {
   int id;
   NCFUNK(nc_inq_varid, ncid, "kFmiIceConcentration", &id);
+  if(ncpalaute)
+    return ncpalaute;
   size_t alku[3] = { [0] = 0, [1] = yalku0-1 };
   for(int j=0; j<ypit0; j++) {
     alku[2] = i_alku[j];
     alku[1]++;
     NCFUNK(nc_get_vara, ncid, id, alku, countpt0, var+j*xpit0);
   }
+  return 0;
 }
 
 #define PINTAALA(lat1, lat2, lon1, lon2) (((lon2)-(lon1))*R2*(sinf(lat2)-sinf(lat1))*1e-6)
@@ -319,7 +348,7 @@ double maarita_laajuus() {
   double pa = 0;
   for(int j=0; j<ypit0-1; j++)
     for(int i=0; i<xpit0-1; i++)
-      pa += (var[IND]>=KONSRAJA) * (var[IND]<1000) * alat[IND]; //1000 poistaa täyttöarvon
+      pa += (var[IND]>=KONSRAJA) * (var[IND]<1024) * alat[IND]; //1024 poistaa täyttöarvon
   return pa;
 }
 #undef IND

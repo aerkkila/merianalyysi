@@ -22,7 +22,7 @@ const float latraja  = 60.2;
 int ncpalaute;
 
 int main(int argc, char** argv) {
-  int ncid, id, alkuvuosi, loppuvuosi, vuosia=-1;
+  int ncid, id, vuosi0, vuosi1, vuosia=-1;
   /*onko annettu jokin toinen vuosien määrä*/
   for(int i=1; i<argc; i++)
     if(sscanf(argv[i], "--vuosia=%i", &vuosia)==1) {
@@ -80,31 +80,27 @@ int main(int argc, char** argv) {
   free(lat); free(lon);
   lat=NULL; lon=NULL;
   kons = malloc(366*xy*sizeof(float));
-#ifdef PAKSRAJA
-  float  *paks;
-  paks = malloc(366*xy*sizeof(float));
-#endif
 
   for(int ajoind=1; ajoind<argc; ajoind++) {
     if(argv[ajoind][strlen(argv[ajoind])-1] == '1') {
-      alkuvuosi = 1975;
-      loppuvuosi = 2006;
+      vuosi0 = 1975;
+      vuosi1 = 2006;
     } else {
-      alkuvuosi = 2006;
-      loppuvuosi = 2100;
+      vuosi0 = 2006;
+      vuosi1 = 2100;
     }
     if(vuosia != -1)
-      loppuvuosi = alkuvuosi+vuosia;
+      vuosi1 = vuosi0 + vuosia;
 
     sprintf(apuc, "laajuudet_%s.txt", argv[ajoind]);
     FILE* f_ulos = fopen(apuc, "w");
     
-    for(int vuosi=alkuvuosi; vuosi<loppuvuosi; vuosi++) {
+    for(int vuosi=vuosi0; ; vuosi++) {
       /*luettavan tiedoston polku*/
       sprintf(apuc, "%s/%s/%s_%i0101_%i1231_%s",
 	      lahdekansio, argv[ajoind], nimialku, vuosi, vuosi, nimiloppu);
       printf("\rvuosi %i / %i, ajo %i / %i   ",
-	     vuosi-alkuvuosi+1, loppuvuosi-alkuvuosi, ajoind, argc-1);
+	     vuosi-vuosi0+1, vuosi1-vuosi0, ajoind-1, argc-1);
       //fflush(stdout);
       NCFUNK(nc_open, apuc, NC_NOWRITE, &ncid);
       NCFUNK(nc_inq_varid, ncid, "soicecov", &id);
@@ -115,20 +111,20 @@ int main(int argc, char** argv) {
 	for(int j=0; j<ypit-1; j++)
 	  for(int i=0; i<xpit-1; i++)
 	    pa += (kons[paiva*xy+j*xpit+i]>=KONSRAJA) * alat[j*xpit+i];
-	int tmp = (paiva+122) % vuoden_pit - 122;
-	fprintf(f_ulos, "%6.0lf\t%3i\t%4i\n", round(pa), tmp, vuosi+(tmp<0));
+	int paiva1 = (paiva+122) % vuoden_pit - 122;
+	if(vuosi+(paiva1<0) >= vuosi1)
+	  goto ULOS;
+	fprintf(f_ulos, "%6.0lf\t%3i\t%4i\n", round(pa), paiva1, vuosi+(paiva1<0));
       }
       NCFUNK(nc_close, ncid);
     }
+  ULOS:
     fclose(f_ulos);
   }
   printf("\n");
   
   free(alat);
   free(kons);
-#ifdef PAKSRAJA
-  free(paks);
-#endif
   
   free(apuc);
   return 0;
