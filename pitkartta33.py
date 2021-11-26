@@ -21,8 +21,8 @@ nemomask = np.flip(nemomask, 0)
 
 #värikartta saadaan epäjatkuvana
 kartta = get_cmap('gnuplot2')
-raja1=235
-rajat = np.arange(0,raja1,18)
+raja1=220
+rajat = np.arange(0,raja1+1,20)
 norm = colors.BoundaryNorm(rajat, kartta.N, clip=True)
 
 otsikot = {'A':'Mean(MP,HC)', 'B':'EC-Earth', 'K':'Ice charts'}
@@ -53,7 +53,7 @@ for jkuva,arvo in enumerate(['10', '50', '90']):
         xpit,ypit,v0,v1 = struct.unpack('hhhh', sisalto[0:8])
         if not fig:
             fig = figure(figsize=((xpit-rvasen-roikea)/100*xgrid/Alue[2]*simsuhde, (ypit-y0)/100*ygrid/Alue[3]))
-            fig.set_facecolor('#bfaaca')
+            fig.set_facecolor('#cccccc')
         fig.add_axes(alue(ikuva,jkuva))
         kuva = np.empty((ypit-y0,xpit), dtype=float)
         muoto = 'h'*xpit

@@ -9,11 +9,11 @@
 inline void laskentalajittele(short* a, int pit, short* ulos);
 char apuc[100];
 int *kpl, *kpl1;
-const char* const kirjaimet = "ABD";
+const char* const kirjaimet = "ABDK";
 #define N_ULOS 3
-#define PIENIN_ARVO -92
-#define ULOSNIMI "ensijää"
-#define SISNIMI "ensijäätyminen1"
+#define PIENIN_ARVO 0
+#define ULOSNIMI "pituus"
+#define SISNIMI "pituudet"
 
 #define _MERKKIJONO(jotain) #jotain
 #define MERKKIJONO(jotain) _MERKKIJONO(jotain)
@@ -45,7 +45,7 @@ int main() {
   int alku = 0;
   /*Tätä pitää muuttaa tilanteen mukaan*/
   /*–––––––––––––––––––––––––––––––––––*/
-  int vuosi0 = 2052;
+  int vuosi0 = otsake[2];
   vuosia = otsake[3]-vuosi0;
   alku = vuosi0-otsake[2];
   otsake[2] = vuosi0;

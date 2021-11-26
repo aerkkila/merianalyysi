@@ -58,7 +58,7 @@ for jkuva,arvo in enumerate(['2','5']):
         xpit,ypit,v0,v1 = struct.unpack('hhhh', sisalto[0:8])
         if not fig:
             fig = figure(figsize=((xpit-vasenNan-oikeaNan)/100*xgrid/Alue[2]*suhde, (ypit-y0)/100*ygrid/Alue[3]))
-            fig.set_facecolor('#bfaaca')
+            fig.set_facecolor('#cccccc')
         fig.add_axes(alue(ikuva,jkuva))
         kuva = np.empty((ypit-y0,xpit), dtype=float)
         muoto = 'h'*xpit
