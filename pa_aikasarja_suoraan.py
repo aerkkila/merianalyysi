@@ -25,11 +25,9 @@ for i in range(len(p_Tn)):
 if suomeksi:
     xnimi = 'vuosi'
     ynimi = 'jään laajuus ($\mathrm{km^2}$)'
-    ulaotsikko = 'aikaikkuna = %i vuotta' %args.aikaikk
 else:
-    xnimi = 'year'
-    ynimi = 'ice extent ($\mathrm{km^2}$)'
-    ulaotsikko = 'time window = %i years' %args.aikaikk
+    xnimi = 'Year'
+    ynimi = 'Ice extent ($\mathrm{km^2}$)'
 
 fig = figure(figsize=(12,10))
 axs = fig.subplots(3,2).flatten()
@@ -37,7 +35,7 @@ ytikit = np.linspace(0,100000,11)
 ynimet = ["%.i" %luku if not i%2 else '' for i,luku in enumerate(ytikit)]
 p_aikaikk = np.arange(1,args.aikaikk+1) / (args.aikaikk+1)
 for aind in range(len(ajot)):
-    tiedos = np.loadtxt('%s/makslaajuudet0_%s.txt'\
+    tiedos = np.loadtxt('%s/makslaajuudet_%s.txt'\
                       %(kansio, ajot[aind]), usecols=[0,2])
     v0 = tiedos[0,1]
     pituus = len(tiedos)-args.aikaikk+1
@@ -46,20 +44,21 @@ for aind in range(len(ajot)):
     #kun n on parillinen, takaa jää yksi vuosi vähemmän pois kuin edestä
     for ind in range(pituus):
         pa = np.sort(tiedos[ind : ind+args.aikaikk, 0]) #valitaan aikaikkuna
-        inter = interp1d(p_aikaikk, pa, kind='cubic')
+        inter = interp1d(p_aikaikk, pa, kind='linear')
         alat[ind,:] = inter(p_Tn)
 
     sca(axs[aind])
     ylim(0,100000)
     vuodet = np.arange(v0,v0+pituus) + (args.aikaikk-1)//2
     plot(vuodet, alat[:,0], color='r')
-    plot(vuodet, alat[:,1:], color='k')
+    plot(vuodet, alat[:,1], color='b')
+    plot(vuodet, alat[:,2:], color='k')
     grid('on')
     yticks(ticks=ytikit, labels=ynimet, fontsize=13)
     viivat=gca().yaxis.get_gridlines()
     for i,viiva in enumerate(viivat):
         if not i%2:
-            viiva.set_color('k')
+            pass #viiva.set_color('k')
         else:
             viiva.set_linestyle(':')
     xlabel(xnimi, fontsize=15)
@@ -79,8 +78,8 @@ for aind in range(len(ajot)):
         ylim([0.85, 1])
 
 #suptitle(ulaotsikko)
-tight_layout(h_pad=1)
+tight_layout()
 if args.tallenna:
-    savefig("%s/laaj0_%s_aikasarja_suoraan.png" %(kuvat, args.aikaikk))
+    savefig("%s/laaj%i_aikasarja_suoraan.png" %(kuvat, args.aikaikk))
 else:
     show()

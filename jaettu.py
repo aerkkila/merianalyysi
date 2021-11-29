@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 kansio = '/home/aerkkila/b/tiedokset'
 ajot = ("A002", "A005", "B002", "B005", "D002", "D005")
 ajot_hist = ('A001', 'B001', 'D001')
-ajonimet = ("Max Planck 4.5", "Max Planc 8.5", "EC-Earth 4.5", "EC-Earth 8.5", "Hadley Centre 4.5", "Hadley Centre 8.5")
+ajonimet = ("Max Planck RCP 4.5", "Max Planc RCP 8.5", "EC-Earth RCP 4.5", "EC-Earth RCP 8.5", "Hadley Centre RCP 4.5", "Hadley Centre RCP 8.5")
 ajonimet_hist = ("Max Planck", "EC-Earth", "Hadley Centre")
 varit = ("red", "lightsalmon", "green", "lime", "blue", "deepskyblue")
 paikat_fi = ('Kemi', 'Kalajoki', 'Mustasaari', 'Nordmaling', 'Rauma', 'Söderhamn')

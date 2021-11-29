@@ -20,7 +20,7 @@ pars.add_argument('-v0', '--vuosi0', type=int, default=2052,
                   help='Ensimmäinen mukaan otettava vuosi')
 pars.add_argument('-v1', '--vuosi1', type=int, default=2097,
                   help='Viimeinen mukaan otettava vuosi')
-pars.add_argument('-l', '--lajit', default='maksh_loppulajit.txt',
+pars.add_argument('-l', '--lajit', default='ø',
                   help='Mikä jakauma sovitetaan (w/g/f/γ/ø): Weibull, Gumbel, Fréchet, Gumbel neliöihin tai ei mikään. Voi antaa yhden lajin, jota käytetään kaikkiin tai jokaiselle eri lajin järjestyksessä paikka,ajo: gwwwgfwwø... tai .txt-päätteisen tiedoston nimen, jossa on lueteltu lajit tuossa järjestyksessä. Tiedostosta luetaan vain nuo kirjaimet (gwfγø) ja seassa saa olla muutakin.')
 pars.add_argument('-h0', '--paksraja', type=float, default=1.0,
                   help='Vain tätä suuremmat arvot huomioidaan jakauman sovituksessa.')
@@ -131,17 +131,17 @@ for pind,paikka in enumerate(paikat_fi):
             print('tuntematon pienten arvojen käsittely: ' + ar.pienet)
 
     plt.grid('on')
-    plt.title(paikat[pind], fontsize=15)
+    plt.title(paikat[pind], fontsize=16)
     locale.setlocale(locale.LC_ALL, paikallisuus)
     paikallista_akselit()
     plt.ylim(0,1)
-    plt.ylabel(ynimi, fontsize=15)
-    plt.xlabel(xnimi, fontsize=15)
-    plt.yticks(fontsize=13)
-    plt.xticks(fontsize=13)
-    plt.legend(fontsize=9, frameon=0)
+    plt.ylabel(ynimi, fontsize=16)
+    plt.xlabel(xnimi, fontsize=16)
+    plt.yticks(ytikit, ynimet, fontsize=16)
+    plt.xticks(fontsize=16)
+    if(paikka=='Nordmaling'):
+        plt.legend(fontsize=14, frameon=0)
     #ohut viiva y-akselille kohtiin 0,1; 0,5 ja 0,9
-    plt.yticks(ytikit, ynimet, fontsize=12)
     viivat=plt.gca().yaxis.get_gridlines()
     for i,viiva in enumerate(viivat):
         if not i%2:
@@ -150,7 +150,6 @@ for pind,paikka in enumerate(paikat_fi):
             viiva.set_linestyle(':')
         else:
             viiva.set_linestyle('none')
-fig.suptitle("%i–%i"%(ar.vuosi0,ar.vuosi1), fontsize=16)
 plt.tight_layout()
 
 if ar.tallenna:

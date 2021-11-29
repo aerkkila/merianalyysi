@@ -14,11 +14,10 @@ if suomeksi:
     ynimi = 'Todennäköisyyskertymä'
     konsrajasana = 'peittävyysraja'
 else:
-    xnimi = 'Ice season length (days)'
-    ynimi = 'Cumulative propability'
+    xnimi = 'Number of ice days'
+    ynimi = 'Probability'
     konsrajasana = 'concentration limit'
     
-
 if len(sys.argv) < 3:
     print(kautto)
     exit()
@@ -45,16 +44,14 @@ for pind,p in enumerate(paikat_fi):
         tiedos = np.loadtxt(tiednimi, usecols=(0,2))
         tiedos = rajaa(tiedos, vuosi0, vuosi1)
         tiedos = np.sort(tiedos[:,0])
-        F = np.array(range(1,len(tiedos)+1)) / (len(tiedos)+1.0) #kertymäfunktio
-        plt.plot(tiedos, F, color=varit[aind], label=ajonimet[aind])
+        y = 1 - np.array(range(1,len(tiedos)+1)) / (len(tiedos)+1.0)
+        plt.plot(tiedos, y, color=varit[aind], label=ajonimet[aind])
 
     plt.grid('on')
     plt.yticks(ticks=ytikit, labels=ynimet, fontsize=13)
     viivat=ax.yaxis.get_gridlines()
     for i,viiva in enumerate(viivat):
-        if not i%2:
-            viiva.set_color('k')
-        else:
+        if i%2:
             viiva.set_linestyle(':')
     plt.title(paikat[pind], fontsize=15)
     plt.ylim(0,1)
@@ -62,7 +59,8 @@ for pind,p in enumerate(paikat_fi):
     plt.ylabel(ynimi, fontsize=15)
     plt.xlabel(xnimi, fontsize=15)
     plt.xticks(fontsize=13)
-    plt.legend(fontsize=11, frameon=0, loc='upper left' if p=='Kemi' else 'lower right')
+    if(p=='Nordmaling'):
+        plt.legend(fontsize=13, frameon=0)
 fig.suptitle(locale.format_string
              ("%i–%i; %s = %.2f", (vuosi0,vuosi1,konsrajasana,knsraj/100)),
              fontsize=18)
