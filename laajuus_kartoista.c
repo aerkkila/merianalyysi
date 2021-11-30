@@ -56,7 +56,7 @@ void nimet_jarjestuksessa(DIR* d, lista* lis);
   xypit0: se osa, joka todellisuudessa tarvitaan. Tämä on viimeisenä määritettävä tarkin arvo.*/
 int main(int argc, char** argv) {
   char apuc[300];
-  int vuosi0=2017, vuosi1=2021;
+  int vuosi0=1980, vuosi1=1991;
   size_t xypit2 = xpit2*ypit2;
   
   /*mahdolliset komentoriviargumentit*/
@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
   int paiv, vuos;
   for(int vuosi=vuosi0-1; ; vuosi++) {
     d = avaa_vuosi(vuosi, kansionimi);
-    if(!d)
-      break;
+    if(!d && vuosi<vuosi1)
+      continue;
     nimet_jarjestuksessa(d, &lis);
     closedir(d);
     d=NULL;
@@ -139,14 +139,15 @@ int main(int argc, char** argv) {
       ncid = avaa_netcdf(apuc);
       if(lue_muuttuja0(ncid, i_alku)) {
 	puts("Tämä virhe ei haittaa");
-	if(vuos >= 2009)
+	if(vuos >= 2007)
 	  poista_tiedosto(apuc);
+	NCFUNK(nc_close, ncid);
 	continue;
       }
       NCFUNK(nc_close, ncid);
       double pa = maarita_laajuus();
       fprintf(f_ulos, "%6.0lf\t%i\t%i\n", pa, paiv, vuos);
-      if(vuos >= 2009)
+      if(vuos >= 2007)
 	poista_tiedosto(apuc);
     }
     for(int i=0; i<lis.pit; i++)
